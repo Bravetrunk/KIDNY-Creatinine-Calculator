@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrCl Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+
+        .toggle-active {
+            background-color: white;
+            color: #2563eb;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .stage-active {
+            background-color: #2563eb;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+            transform: scale(1.02);
+            font-weight: 700;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .drug-chip {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .drug-chip:hover {
+            transform: translateY(-2px);
+            border-color: #2563eb;
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="p-2 bg-slate-800 rounded-lg text-white">
+                        <i data-lucide="calculator" size="24"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-800">CrCl Calculator</h1>
+                </div>
+                <p class="text-slate-500 text-sm">Renal Dose Adjustment</p>
+            </div>
+            <button id="resetBtn" class="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors shadow-sm text-sm font-medium">
+                <i data-lucide="refresh-ccw" size="16"></i> Reset
+            </button>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Column 1: Inputs -->
+            <div class="lg:col-span-4 space-y-6">
+                <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <i data-lucide="activity" size="14"></i> Patient Parameters
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl" id="sexToggle">
+                                <button data-sex="male" class="toggle-btn py-2 text-xs font-bold rounded-lg transition-all toggle-active">Male</button>
+                                <button data-sex="female" class="toggle-btn py-2 text-xs font-bold rounded-lg transition-all text-slate-500">Female</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="age" class="text-[10px] font-bold text-slate-500 uppercase">Age (yrs)</label>
+                                <input type="number" id="age" placeholder="45" class="w-full mt-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label for="weight" class="text-[10px] font-bold text-slate-500 uppercase">Weight (kg)</label>
+                                <input type="number" id="weight" placeholder="75" class="w-full mt-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center">
+                                <label for="creatinine" class="text-[10px] font-bold text-slate-500 uppercase">Serum Creatinine</label>
+                                <select id="unitSelector" class="text-[10px] font-bold text-blue-600 bg-transparent uppercase outline-none">
+                                    <option value="mg/dL">mg/dL</option>
+                                    <option value="umol/L">μmol/L</option>
+                                </select>
+                            </div>
+                            <input type="number" step="0.01" id="creatinine" placeholder="1.1" class="w-full mt-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Static Cutoffs -->
+                <section class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg">
+                    <h3 class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">Quick Safety Thresholds</h3>
+                    <div class="space-y-3 text-[11px]">
+                        <div class="flex justify-between border-b border-slate-800 pb-2">
+                            <span>Metformin</span><span class="font-bold text-blue-300">CI if CrCl &lt; 30</span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-800 pb-2">
+                            <span>SGLT2i (General)</span><span class="font-bold text-blue-300">Check if CrCl &lt; 45</span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-800 pb-2">
+                            <span>Direct Anticoagulants</span><span class="font-bold text-blue-300">Review if CrCl &lt; 50</span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-800 pb-2">
+                            <span>NSAIDs</span><span class="font-bold text-blue-300">Avoid if CrCl &lt; 30</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Column 2: Result & Local Adjuster -->
+            <div class="lg:col-span-8 space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div id="emptyState" class="py-12 text-center text-slate-400">
+                        <i data-lucide="calculator" size="48" class="mx-auto mb-4 opacity-20"></i>
+                        <p>Enter patient details to calculate renal function.</p>
+                    </div>
+
+                    <div id="resultContent" class="hidden animate-fade-in">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+                            <div>
+                                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Estimated CrCl</p>
+                                <div class="flex items-baseline gap-2">
+                                    <span id="crclValue" class="text-6xl font-black text-slate-900 tracking-tighter">0.00</span>
+                                    <span class="text-slate-400 font-semibold">mL/min</span>
+                                </div>
+                            </div>
+                            <div id="interpretationBadge" class="px-4 py-2 rounded-xl border text-sm font-bold shadow-sm">
+                                Stage 1
+                            </div>
+                        </div>
+
+                        <!-- Local Drug Adjustment Database -->
+                        <div class="border-t border-slate-100 pt-8 mt-8">
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="book-open" class="text-blue-600" size="18"></i>
+                                Renal Dosing Guidelines (Local Database)
+                            </h3>
+                            
+                            <div class="flex flex-col md:flex-row gap-3 mb-6">
+                                <div class="relative flex-grow">
+                                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size="16"></i>
+                                    <input type="text" id="drugInput" placeholder="Search drug database (e.g. Apixaban, Gabapentin)..." class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                                </div>
+                            </div>
+
+                            <!-- Common Suggestions -->
+                            <div class="flex flex-wrap gap-2 mb-6" id="chipContainer">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase py-1">Quick Select:</span>
+                                <!-- Chips added via JS -->
+                            </div>
+
+                            <!-- Dosing Output -->
+                            <div id="dosingResult" class="hidden p-6 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-800 leading-relaxed animate-fade-in shadow-sm">
+                                <!-- Local Content here -->
+                            </div>
+                            
+                            <div id="noResults" class="hidden p-8 border-2 border-dashed border-slate-100 rounded-2xl text-center text-slate-400 text-xs italic">
+                                Drug not found in local database. Showing general CKD guidance instead.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-600 text-white p-6 rounded-2xl flex items-start gap-4 shadow-xl">
+                    <i data-lucide="info" class="flex-shrink-0 mt-1 opacity-80" size="20"></i>
+                    <div>
+                        <h4 class="font-bold text-sm mb-1 uppercase tracking-wider">Clinical Disclaimer</h4>
+                        <p class="text-xs leading-relaxed opacity-90">
+                            This tool provides general guidance based on standard Cockcroft-Gault calculations and KDIGO stages. It does not replace clinical judgment or official pharmacy prescribing information. Data is stored locally and runs without an internet connection.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data: Hard-coded local drug database (Dosing Adjustments)
+        const MEDICATIONS = {
+            "apixaban": {
+                name: "Apixaban (Eliquis)",
+                rules: [
+                    { min: 0, max: 24.9, msg: "Avoid use for VTE treatment. For AFib: Reduce dose to 2.5mg BID if any two of: Age ≥80, Weight ≤60kg, or SCr ≥1.5." },
+                    { min: 25, max: 1000, msg: "Standard dosing. If patient has 2/3 criteria (Age, Weight, SCr), consider dose reduction to 2.5mg BID." }
+                ]
+            },
+            "metformin": {
+                name: "Metformin",
+                rules: [
+                    { min: 0, max: 29.9, msg: "CONTRAINDICATED. Discontinue immediately." },
+                    { min: 30, max: 44.9, msg: "Max dose 1000mg daily. Do not initiate new treatment." },
+                    { min: 45, max: 1000, msg: "Monitor renal function annually. Dose as tolerated." }
+                ]
+            },
+            "gabapentin": {
+                name: "Gabapentin",
+                rules: [
+                    { min: 0, max: 14.9, msg: "100-300mg every other day." },
+                    { min: 15, max: 29.9, msg: "200-700mg once daily." },
+                    { min: 30, max: 59.9, msg: "400-1400mg daily (split BID)." },
+                    { min: 60, max: 1000, msg: "Standard dosing (900-3600mg daily split TID)." }
+                ]
+            },
+            "rivaroxaban": {
+                name: "Rivaroxaban (Xarelto)",
+                rules: [
+                    { min: 0, max: 14.9, msg: "Avoid use. Limited clinical data." },
+                    { min: 15, max: 49.9, msg: "AFib: Reduce to 15mg daily with evening meal." },
+                    { min: 50, max: 1000, msg: "AFib: Standard 20mg daily with evening meal." }
+                ]
+            },
+            "enoxaparin": {
+                name: "Enoxaparin (Lovenox)",
+                rules: [
+                    { min: 0, max: 29.9, msg: "Treatment: 1mg/kg once daily. Prophylaxis: 30mg once daily." },
+                    { min: 30, max: 1000, msg: "Treatment: 1mg/kg every 12h or 1.5mg/kg daily. Prophylaxis: 40mg daily." }
+                ]
+            },
+            "vancomycin": {
+                name: "Vancomycin (IV)",
+                rules: [
+                    { min: 0, max: 20, msg: "Consult Pharmacy. High risk of accumulation. Typical: dose every 48-72h with troughs." },
+                    { min: 20, max: 49, msg: "Dose every 24h. Monitor troughs closely." },
+                    { min: 50, max: 1000, msg: "Standard interval dosing (every 8-12h)." }
+                ]
+            },
+            "allopurinol": {
+                name: "Allopurinol",
+                rules: [
+                    { min: 0, max: 10, msg: "Max 100mg daily or 100mg every 48h." },
+                    { min: 10, max: 20, msg: "Max 100-200mg daily." },
+                    { min: 20, max: 1000, msg: "Standard titration (up to 800mg daily)." }
+                ]
+            },
+            "nsaids": {
+                name: "NSAIDs (General)",
+                rules: [
+                    { min: 0, max: 29.9, msg: "Generally Avoid. High risk of Acute Kidney Injury (AKI)." },
+                    { min: 30, max: 1000, msg: "Use lowest effective dose for shortest duration. Monitor renal function." }
+                ]
+            }
+        };
+
+        // UI Initialization
+        lucide.createIcons();
+        const UMOL_TO_MGDL = 88.4;
+        let currentSex = 'male';
+
+        // Elements
+        const ageInput = document.getElementById('age');
+        const weightInput = document.getElementById('weight');
+        const crInput = document.getElementById('creatinine');
+        const unitSelector = document.getElementById('unitSelector');
+        const drugInput = document.getElementById('drugInput');
+        const dosingResult = document.getElementById('dosingResult');
+        const chipContainer = document.getElementById('chipContainer');
+
+        // Populate Chips
+        Object.keys(MEDICATIONS).forEach(key => {
+            const btn = document.createElement('button');
+            btn.className = 'drug-chip px-2 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold text-slate-600 capitalize';
+            btn.textContent = key;
+            btn.onclick = () => {
+                drugInput.value = key;
+                handleDosingLookup();
+            };
+            chipContainer.appendChild(btn);
+        });
+
+        // Calculation Logic
+        function calculate() {
+            const age = parseFloat(ageInput.value);
+            const weight = parseFloat(weightInput.value);
+            let scr = parseFloat(crInput.value);
+            
+            if (isNaN(age) || isNaN(weight) || isNaN(scr) || scr <= 0) {
+                document.getElementById('resultContent').classList.add('hidden');
+                document.getElementById('emptyState').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('resultContent').classList.remove('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+
+            if (unitSelector.value === 'umol/L') scr = scr / UMOL_TO_MGDL;
+
+            let crcl = ((140 - age) * weight) / (72 * scr);
+            if (currentSex === 'female') crcl *= 0.85;
+
+            const final = crcl.toFixed(1);
+            document.getElementById('crclValue').textContent = final;
+            updateInterpretation(parseFloat(final));
+            handleDosingLookup(); // Auto-update dosing info if a drug is selected
+        }
+
+        function updateInterpretation(val) {
+            const badge = document.getElementById('interpretationBadge');
+            badge.className = 'px-4 py-2 rounded-xl border text-sm font-bold ';
+            if (val >= 90) { badge.textContent = 'Stage 1'; badge.classList.add('bg-green-50', 'text-green-600', 'border-green-200'); }
+            else if (val >= 60) { badge.textContent = 'Stage 2'; badge.classList.add('bg-emerald-50', 'text-emerald-600', 'border-emerald-200'); }
+            else if (val >= 30) { badge.textContent = 'Stage 3'; badge.classList.add('bg-amber-50', 'text-amber-600', 'border-amber-200'); }
+            else if (val >= 15) { badge.textContent = 'Stage 4'; badge.classList.add('bg-orange-50', 'text-orange-600', 'border-orange-200'); }
+            else { badge.textContent = 'Stage 5'; badge.classList.add('bg-red-50', 'text-red-600', 'border-red-200'); }
+        }
+
+        function handleDosingLookup() {
+            const query = drugInput.value.toLowerCase().trim();
+            const crcl = parseFloat(document.getElementById('crclValue').textContent);
+            
+            if (!query) {
+                dosingResult.classList.add('hidden');
+                document.getElementById('noResults').classList.add('hidden');
+                return;
+            }
+
+            const medication = MEDICATIONS[query] || Object.values(MEDICATIONS).find(m => m.name.toLowerCase().includes(query));
+
+            if (medication) {
+                const rule = medication.rules.find(r => crcl >= r.min && crcl <= r.max);
+                dosingResult.innerHTML = `
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
+                            <i data-lucide="check-circle" size="14"></i>
+                        </div>
+                        <span class="font-bold text-blue-900">${medication.name} Adjustment</span>
+                    </div>
+                    <p class="font-medium text-slate-700 leading-relaxed">${rule ? rule.msg : 'Consult specialist for these parameters.'}</p>
+                    <div class="mt-4 pt-4 border-t border-slate-200 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                        Based on CrCl ${crcl} mL/min
+                    </div>
+                `;
+                dosingResult.classList.remove('hidden');
+                document.getElementById('noResults').classList.add('hidden');
+                lucide.createIcons();
+            } else {
+                dosingResult.classList.add('hidden');
+                document.getElementById('noResults').classList.remove('hidden');
+            }
+        }
+
+        // Listeners
+        [ageInput, weightInput, crInput].forEach(el => el.addEventListener('input', calculate));
+        unitSelector.addEventListener('change', () => {
+            const label = unitSelector.value;
+            crInput.placeholder = label === 'mg/dL' ? '1.1' : '97';
+            calculate();
+        });
+        
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('toggle-active', 'text-slate-500'));
+                btn.classList.add('toggle-active');
+                document.querySelectorAll('.toggle-btn').forEach(b => { if(!b.classList.contains('toggle-active')) b.classList.add('text-slate-500') });
+                currentSex = btn.dataset.sex;
+                calculate();
+            });
+        });
+
+        drugInput.addEventListener('input', handleDosingLookup);
+        document.getElementById('resetBtn').addEventListener('click', () => location.reload());
+    </script>
+</body>
+</html>
