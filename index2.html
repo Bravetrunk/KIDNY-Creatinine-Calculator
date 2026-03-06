@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renal Dose Calculator (Thai CPG)</title>
+    <!-- ใช้ Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ใช้ Font Inter เพื่อความคล้ายคลึงกับ SF Pro ใน Reference -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f2f1f6; /* สีพื้นหลังม่วงเทาอ่อนๆ สบายตา */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* สไตล์ Card โค้งมนแบบ Reference */
+        .bento-card {
+            background-color: #ffffff;
+            border-radius: 32px;
+            padding: 28px;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Input แบบใหม่ โค้งมนและดูสะอาด */
+        .soft-input {
+            background-color: #f4f4f5;
+            border: 2px solid transparent;
+            color: #111827;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .soft-input:focus {
+            background-color: #ffffff;
+            border-color: #c2a3ff; /* สีม่วงตาม Reference */
+            outline: none;
+            box-shadow: 0 4px 12px rgba(194, 163, 255, 0.2);
+        }
+
+        /* ซ่อนลูกศรใน input number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+
+        /* Toggle ปุ่มเพศสไตล์ Pill */
+        .pill-toggle {
+            background-color: #f4f4f5;
+            border-radius: 9999px;
+            padding: 4px;
+            display: flex;
+        }
+        
+        .pill-btn {
+            border-radius: 9999px;
+            color: #6b7280;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pill-btn.active {
+            background-color: #c2a3ff; /* สีม่วง */
+            color: #111827;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            font-weight: 600;
+        }
+
+        /* ปุ่ม Calculate เข้มๆ แบบ Reference */
+        .action-btn {
+            background-color: #222222;
+            color: #ffffff;
+            border-radius: 9999px; /* Pill shape */
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            background-color: #000000;
+            transform: scale(0.98);
+        }
+
+        /* Scrollbar อ่อนๆ */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+
+        /* สีพื้นหลังของ Card แนะนำยา (Dynamic) */
+        .bg-purple-ref { background-color: #c2a3ff; } /* สีม่วงอ่อน */
+        .bg-red-ref { background-color: #ff5d5d; }    /* สีแดงอมส้ม */
+        .bg-green-ref { background-color: #d1fae5; }  /* สีเขียวอ่อน */
+        .bg-empty-ref { background-color: #e5e7eb; }  /* สีเทา State ว่าง */
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-6 lg:p-8">
+
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        
+        <!-- ==================== คอลัมน์ซ้าย (Input & Search) ==================== -->
+        <div class="col-span-1 lg:col-span-5 flex flex-col gap-6 lg:gap-8">
+            
+            <!-- 1. Input & Calculator Card -->
+            <div class="bento-card">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">Calculator</h2>
+                    <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full font-medium">Renal Dose</span>
+                </div>
+                
+                <div class="space-y-5">
+                    <!-- Age -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-600">Age (Years)</label>
+                        <input type="number" id="input-age" class="soft-input px-4 py-2 w-28 text-center text-lg" placeholder="e.g. 65">
+                    </div>
+                    
+                    <!-- Gender Toggle -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-600">Gender</label>
+                        <div class="pill-toggle w-40">
+                            <button onclick="setGender('male')" id="btn-male" class="pill-btn active flex-1 py-2 text-sm">Male</button>
+                            <button onclick="setGender('female')" id="btn-female" class="pill-btn flex-1 py-2 text-sm">Female</button>
+                        </div>
+                    </div>
+
+                    <!-- Weight -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-600">Weight (kg)</label>
+                        <input type="number" id="input-weight" class="soft-input px-4 py-2 w-28 text-center text-lg" placeholder="e.g. 70">
+                    </div>
+
+                    <!-- SCr -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-600">SCr (mg/dL)</label>
+                        <input type="number" id="input-scr" step="0.1" class="soft-input px-4 py-2 w-28 text-center text-lg" placeholder="e.g. 1.2">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Results & Search Card -->
+            <div class="bento-card">
+                <h2 class="text-2xl font-semibold text-gray-900 tracking-tight mb-6">Search</h2>
+                
+                <!-- Results Display (Pill style) -->
+                <div class="flex flex-col gap-3 mb-6">
+                    <div class="flex items-center justify-between bg-[#222222] text-white p-4 rounded-2xl">
+                        <div class="flex items-center">
+                            <span id="dot-crcl" class="w-2.5 h-2.5 rounded-full bg-gray-500 mr-3"></span>
+                            <span class="text-sm font-medium text-gray-300">CrCl (CG)</span>
+                        </div>
+                        <div class="flex items-baseline">
+                            <span id="val-crcl" class="text-xl font-bold">--</span>
+                            <span class="text-xs text-gray-400 ml-1">ml/min</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-gray-100 p-4 rounded-2xl">
+                        <div class="flex flex-col">
+                            <div class="flex items-center">
+                                <span id="dot-egfr" class="w-2.5 h-2.5 rounded-full bg-gray-400 mr-3"></span>
+                                <span class="text-sm font-medium text-gray-600">eGFR (CKD-EPI)</span>
+                            </div>
+                            <span id="val-ckd-stage" class="text-xs font-bold text-gray-400 mt-1 ml-5">Stage --</span>
+                        </div>
+                        <div class="flex items-baseline">
+                            <span id="val-egfr" class="text-xl font-bold text-gray-900">--</span>
+                            <span class="text-xs text-gray-500 ml-1">ml/min/1.73m²</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Input -->
+                <div class="relative mb-5">
+                    <input type="text" id="drug-search" disabled class="soft-input w-full px-5 py-3.5 pl-12 text-sm disabled:opacity-50 disabled:bg-gray-100 rounded-full" placeholder="Type Generic or Trade Name...">
+                    <svg class="w-5 h-5 text-gray-400 absolute left-4 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <!-- Search Dropdown -->
+                    <div id="search-dropdown" class="absolute z-50 w-full bg-white mt-2 rounded-2xl shadow-xl border border-gray-100 hidden max-h-60 overflow-y-auto"></div>
+                </div>
+
+                <!-- Categories -->
+                <div class="mb-6">
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="filterCategory('Antidiabetic')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Antidiabetics</button>
+                        <button onclick="filterCategory('Antibiotic')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Antibiotics</button>
+                        <button onclick="filterCategory('Cardiovascular')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Cardiovascular</button>
+                        <button onclick="filterCategory('Analgesic')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Analgesics</button>
+                        <button onclick="filterCategory('H2 Blocker')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">H2 Blockers</button>
+                        <button onclick="filterCategory('Quinolone')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Quinolones</button>
+                        <button onclick="filterCategory('Cephalosporin')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Cephalosporins</button>
+                        <button onclick="filterCategory('Aminoglycoside')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Aminoglycosides</button>
+                    </div>
+                </div>
+
+                <!-- All Drugs List (A-Z) -->
+                <div class="flex flex-col mt-2">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">All Drugs (A-Z)</div>
+                        <div id="drug-count" class="text-xs text-gray-400 font-medium bg-gray-100 px-2 py-1 rounded-full">-- items</div>
+                    </div>
+                    
+                    <div id="all-drugs-list" class="space-y-2 max-h-[260px] overflow-y-auto pr-2 pb-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== คอลัมน์ขวา (Recommendation) ==================== -->
+        <div class="col-span-1 lg:col-span-7 h-full">
+            <!-- Container หลักที่จะเปลี่ยนสี Background ตามสถานะ (Vibrant Cards) -->
+            <div id="dosing-container" class="bento-card h-full min-h-[650px] flex flex-col relative overflow-hidden bg-empty-ref transition-colors duration-500 sticky top-8">
+                
+                <!-- Initial State -->
+                <div id="dosing-empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 p-8 text-center">
+                    <div class="bg-white p-4 rounded-full shadow-sm mb-4">
+                        <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <p class="font-medium">Please calculate renal function and select a drug</p>
+                </div>
+
+                <!-- Active State -->
+                <div id="dosing-content" class="hidden flex-1 flex flex-col z-10 relative">
+                    
+                    <!-- Top Pill (Reference style: "5:00-6:30 PM") -->
+                    <div class="flex justify-between items-start mb-6">
+                        <button class="w-10 h-10 bg-white/30 hover:bg-white/50 rounded-full flex items-center justify-center text-gray-900 transition backdrop-blur-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        
+                        <div class="bg-[#222222] text-white px-5 py-2 rounded-full flex items-center shadow-md">
+                            <span class="text-sm font-medium mr-2" id="rec-param-name">eGFR</span>
+                            <span class="text-sm font-bold bg-white/20 px-2 py-0.5 rounded-full" id="rec-param-val">42</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Header -->
+                    <div class="mb-8">
+                        <h2 id="rec-drug-name" class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-2">Metformin</h2>
+                        <p id="rec-drug-cat" class="text-gray-800 font-medium text-lg opacity-80">Antidiabetic</p>
+                    </div>
+
+                    <!-- Recommendation Alert Box (Red/White depending on context) -->
+                    <div id="rec-alert-box" class="bg-white rounded-[24px] p-6 mb-8 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span id="rec-icon" class="text-2xl">⚠️</span>
+                            <h3 id="rec-status-title" class="text-xl font-bold text-gray-900">Dose Adjustment Required</h3>
+                        </div>
+                        <div class="space-y-4 ml-1">
+                            <div>
+                                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Recommended Dose</div>
+                                <div id="rec-dose" class="text-lg font-semibold text-gray-800">ขนาดยาสูงสุดไม่เกิน 1,000 mg / วัน</div>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Clinical Note</div>
+                                <div id="rec-note" class="text-base text-gray-600">ควรติดตามการทำงานของไตอย่างใกล้ชิด</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guidelines -->
+                    <div class="mt-auto bg-white/40 backdrop-blur-md rounded-[24px] p-6">
+                        <div class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider text-xs">Full Guidelines</div>
+                        <ul id="rec-guideline-list" class="text-sm text-gray-700 space-y-2 mb-4 font-medium">
+                            <!-- Populated by JS -->
+                        </ul>
+                        <div class="text-xs text-gray-600/80 font-medium pt-3 border-t border-white/30">
+                            Ref: <span id="rec-reference">Thai CPG</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let patientGender = 'male';
+        let calculatedCrCl = null;
+        let calculatedEGFR = null;
+
+        const drugDatabase = {
+            'metformin': {
+                name: 'Metformin',
+                category: 'Antidiabetic',
+                param: 'eGFR',
+                reference: 'แนวทางเวชปฏิบัติสำหรับโรคเบาหวาน 2566',
+                rules: [
+                    { min: 45, max: 999, status: 'normal', title: 'Normal Dosing', dose: 'Max 2,000 - 2,550 mg/day', note: 'ติดตามการทำงานของไตปีละ 1 ครั้ง' },
+                    { min: 30, max: 44.9, status: 'warning', title: 'Dose Adjustment Required', dose: 'Max 1,000 mg / day', note: 'ควรลดขนาดยาลงครึ่งหนึ่ง และไม่ควรเริ่มยาใหม่' },
+                    { min: 0, max: 29.9, status: 'danger', title: 'Contraindicated', dose: 'Do not use (ห้ามใช้)', note: 'หยุดยา เสี่ยงต่อภาวะ Lactic acidosis' }
+                ],
+                guidelines: [
+                    'eGFR ≥ 45: ปกติ (Max 2,000 - 2,550 mg/day)',
+                    'eGFR 30-44: Max 1,000 mg/day (ห้ามเริ่มยาใหม่)',
+                    'eGFR < 30: 🔴 Contraindicated (ห้ามใช้)'
+                ]
+            },
+            'sitagliptin': {
+                name: 'Sitagliptin',
+                category: 'Antidiabetic',
+                param: 'CrCl',
+                reference: 'Thai Diabetes CPG / Product Insert',
+                rules: [
+                    { min: 50, max: 999, status: 'normal', title: 'Normal Dosing', dose: '100 mg once daily', note: 'ขนาดยาปกติ' },
+                    { min: 30, max: 49.9, status: 'warning', title: 'Dose Adjustment Required', dose: '50 mg once daily', note: 'พิจารณาติดตามการทำงานของไต' },
+                    { min: 0, max: 29.9, status: 'danger', title: 'Severe Renal Impairment', dose: '25 mg once daily', note: 'ใช้ขนาดนี้รวมถึงผู้ป่วย ESRD ที่ต้องฟอกเลือด' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 50: 100 mg / วัน',
+                    'CrCl 30-49: 50 mg / วัน',
+                    'CrCl < 30: 25 mg / วัน'
+                ]
+            },
+            'allopurinol': {
+                name: 'Allopurinol',
+                category: 'Anti-gout',
+                param: 'CrCl',
+                reference: 'สมาคมรูมาติสซั่มแห่งประเทศไทย',
+                rules: [
+                    { min: 60, max: 999, status: 'normal', title: 'Normal Dosing', dose: '100 - 300 mg / day', note: 'เริ่มที่ 100 mg แล้วปรับเพิ่มตามเป้าหมาย Uric acid' },
+                    { min: 20, max: 59.9, status: 'warning', title: 'Dose Adjustment Required', dose: 'Max 200 mg / day', note: 'ระวังการสะสมของยา' },
+                    { min: 10, max: 19.9, status: 'warning', title: 'Severe Dose Adjustment', dose: 'Max 100 mg / day', note: 'เฝ้าระวังผลข้างเคียงอย่างใกล้ชิด' },
+                    { min: 0, max: 9.9, status: 'danger', title: 'ESRD Dosing', dose: '100 mg every 2-3 days', note: 'พิจารณาเปลี่ยนกลุ่มยาหากจำเป็น' }
+                ],
+                guidelines: [
+                    'CrCl > 60: ปกติ',
+                    'CrCl 20-60: Max 200 mg / วัน',
+                    'CrCl 10-20: Max 100 mg / วัน',
+                    'CrCl < 10: 100 mg ทุก 2-3 วัน'
+                ]
+            },
+            'amoxicillin_clav': {
+                name: 'Amoxicillin/Clavulanate',
+                category: 'Antibiotic (Penicillin)',
+                param: 'CrCl',
+                reference: 'Sanford Guide',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Normal Dosing', dose: 'Standard dose', note: 'ไม่ต้องปรับขนาดยา (เช่น 1g q12h หรือ 625mg q8h)' },
+                    { min: 10, max: 29.9, status: 'warning', title: 'Dose Adjustment Required', dose: '625 mg ทุก 12 ชั่วโมง', note: 'ห้ามใช้รูปแบบ Extended Release (1g)' },
+                    { min: 0, max: 9.9, status: 'danger', title: 'Severe Renal Impairment', dose: '625 mg ทุก 24 ชั่วโมง', note: 'ให้ยาหลังฟอกเลือดเสร็จในวันที่ต้องฟอกเลือด' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 30: ขนาดยาปกติ',
+                    'CrCl 10-29: 625 mg q12h',
+                    'CrCl < 10: 625 mg q24h'
+                ]
+            },
+            'levofloxacin': {
+                name: 'Levofloxacin',
+                category: 'Antibiotic (Quinolone)',
+                param: 'CrCl',
+                reference: 'Sanford Guide',
+                rules: [
+                    { min: 50, max: 999, status: 'normal', title: 'Normal Dosing', dose: '500 - 750 mg วันละ 1 ครั้ง', note: 'ไม่ต้องปรับขนาดยา' },
+                    { min: 20, max: 49.9, status: 'warning', title: 'Dose Adjustment Required', dose: 'Dose แรก 500 mg จากนั้น 250 mg วันละ 1 ครั้ง', note: 'ลดขนาดยา Maintenance' },
+                    { min: 10, max: 19.9, status: 'warning', title: 'Severe Renal Impairment', dose: 'Dose แรก 500 mg จากนั้น 250 mg ทุก 48 ชั่วโมง', note: 'ยืดระยะเวลาการให้ยา' },
+                    { min: 0, max: 9.9, status: 'danger', title: 'ESRD Dosing', dose: 'Dose แรก 500 mg จากนั้น 250 mg ทุก 48 ชั่วโมง', note: 'ระวังอาการข้างเคียงทางระบบประสาท' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 50: ปกติ',
+                    'CrCl 20-49: Initial 500mg, then 250mg q24h',
+                    'CrCl < 20: Initial 500mg, then 250mg q48h'
+                ]
+            },
+            'acyclovir': {
+                name: 'Acyclovir (Oral)',
+                category: 'Antiviral',
+                param: 'CrCl',
+                reference: 'Product Insert',
+                rules: [
+                    { min: 25, max: 999, status: 'normal', title: 'Normal Dosing', dose: '800 mg ทุก 4 ชั่วโมง (5 ครั้ง/วัน)', note: 'ขนาดยาสำหรับงูสวัด (Herpes Zoster)' },
+                    { min: 10, max: 24.9, status: 'warning', title: 'Dose Adjustment Required', dose: '800 mg ทุก 8 ชั่วโมง', note: 'ปรับระยะเวลาการให้ยา' },
+                    { min: 0, max: 9.9, status: 'danger', title: 'Severe Renal Impairment', dose: '800 mg ทุก 12 ชั่วโมง', note: 'ปรับระยะเวลาการให้ยา' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 25: 800 mg 5 times/day (Zoster)',
+                    'CrCl 10-24: 800 mg q8h',
+                    'CrCl < 10: 800 mg q12h'
+                ]
+            },
+            'enalapril': {
+                name: 'Enalapril',
+                category: 'Cardiovascular (ACEI)',
+                param: 'CrCl',
+                reference: 'Thai CPG',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Normal Dosing', dose: '5 - 40 mg / วัน', note: 'ติดตาม SCr และ Potassium หลังเริ่มยา' },
+                    { min: 0, max: 29.9, status: 'warning', title: 'Dose Adjustment Required', dose: 'เริ่ม 2.5 mg / วัน', note: 'ปรับเพิ่มยาอย่างระมัดระวัง (ระวัง Hyperkalemia และ AKI)' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 30: ปกติ (เริ่ม 5 mg/day)',
+                    'CrCl < 30: เริ่ม 2.5 mg/day'
+                ]
+            },
+            'rosuvastatin': {
+                name: 'Rosuvastatin',
+                category: 'Cardiovascular (Statin)',
+                param: 'CrCl',
+                reference: 'Product Insert',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Normal Dosing', dose: '5 - 40 mg วันละ 1 ครั้ง', note: 'ไม่ต้องปรับขนาดยา' },
+                    { min: 0, max: 29.9, status: 'warning', title: 'Dose Adjustment Required', dose: 'เริ่ม 5 mg / วัน (สูงสุดไม่เกิน 10 mg / วัน)', note: 'ระวังภาวะกล้ามเนื้อสลาย (Rhabdomyolysis)' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 30: ปกติ',
+                    'CrCl < 30: เริ่ม 5 mg, Max 10 mg/day'
+                ]
+            },
+            'digoxin': {
+                name: 'Digoxin',
+                category: 'Cardiovascular',
+                param: 'CrCl',
+                reference: 'Clinical Guidelines',
+                rules: [
+                    { min: 50, max: 999, status: 'normal', title: 'Normal Dosing', dose: '0.125 - 0.25 mg / วัน', note: 'ปรับขนาดยาตามระดับยาในเลือด' },
+                    { min: 10, max: 49.9, status: 'warning', title: 'Dose Adjustment Required', dose: '0.0625 - 0.125 mg / วัน', note: 'หรือให้ยาทุก 48 ชั่วโมง' },
+                    { min: 0, max: 9.9, status: 'danger', title: 'Severe Renal Impairment', dose: '0.0625 mg ทุก 48 ชั่วโมง', note: 'เสี่ยงต่อ Digoxin Toxicity สูงมาก' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 50: 100% of normal dose',
+                    'CrCl 10-49: 25-75% of normal dose (or q48h)',
+                    'CrCl < 10: 10-25% of normal dose (or q48h-q72h)'
+                ]
+            },
+            'captopril': {
+                name: 'Captopril',
+                category: 'Cardiovascular (ACEI)',
+                param: 'CrCl',
+                reference: 'Product Insert',
+                rules: [
+                    { min: 50, max: 999, status: 'normal', title: 'Normal Dosing', dose: '12.5 - 50 mg วันละ 2-3 ครั้ง', note: 'ไม่ต้องปรับขนาดยา ติดตามระดับ Potassium' },
+                    { min: 10, max: 49.9, status: 'warning', title: 'Dose Adjustment Required', dose: 'เริ่ม 12.5 mg วันละ 2 ครั้ง', note: 'ปรับเพิ่มยาอย่างระมัดระวัง' },
+                    { min: 0, max: 9.9, status: 'danger', title: 'Severe Renal Impairment', dose: 'เริ่ม 6.25 - 12.5 mg วันละ 1 ครั้ง', note: 'ระวัง Hyperkalemia และไตวายเฉียบพลัน' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 50: ขนาดยาปกติ',
+                    'CrCl 10-49: เริ่ม 12.5 mg BID',
+                    'CrCl < 10: เริ่ม 6.25 - 12.5 mg OD'
+                ]
+            },
+            'losartan': {
+                name: 'Losartan',
+                category: 'Cardiovascular (ARB)',
+                param: 'CrCl',
+                reference: 'Product Insert',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Normal Dosing', dose: '50 mg วันละ 1 ครั้ง', note: 'ไม่ต้องปรับขนาดยา' },
+                    { min: 0, max: 29.9, status: 'warning', title: 'Dose Adjustment Required', dose: 'เริ่ม 25 mg วันละ 1 ครั้ง', note: 'ผู้ป่วยที่มีภาวะ Intravascular volume depletion หรือ CrCl ต่ำ ควรเริ่มขนาดต่ำ' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 30: เริ่ม 50 mg OD',
+                    'CrCl < 30: เริ่ม 25 mg OD'
+                ]
+            },
+            'furosemide': {
+                name: 'Furosemide',
+                category: 'Cardiovascular (Diuretic)',
+                param: 'CrCl',
+                reference: 'Clinical Guidelines',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Normal Dosing', dose: '20 - 80 mg / วัน', note: 'ขนาดยาปกติ' },
+                    { min: 0, max: 29.9, status: 'warning', title: 'High Dose Required', dose: 'อาจต้องใช้ขนาดยาสูงขึ้น', note: 'ผู้ป่วยไตวายเรื้อรังมักดื้อต่อยาขับปัสสาวะ อาจต้องใช้ยาสูงถึง 160-200 mg/วัน แต่ต้องระวังผลข้างเคียงต่อการได้ยิน (Ototoxicity)' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 30: ขนาดยาปกติ',
+                    'CrCl < 30: อาจต้องปรับเพิ่มขนาดยา ระวัง Ototoxicity'
+                ]
+            },
+            'empagliflozin': {
+                name: 'Empagliflozin',
+                category: 'Antidiabetic (SGLT2i)',
+                param: 'eGFR',
+                reference: 'Thai Diabetes CPG / KDIGO',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Normal Dosing', dose: '10 - 25 mg วันละ 1 ครั้ง', note: 'ขนาดยาปกติ' },
+                    { min: 20, max: 29.9, status: 'warning', title: 'Caution', dose: '10 mg วันละ 1 ครั้ง', note: 'ใช้สำหรับชะลอไตเสื่อมหรือ Heart Failure (ไม่ได้ผลในการลดน้ำตาล)' },
+                    { min: 0, max: 19.9, status: 'danger', title: 'Not Recommended', dose: 'ไม่แนะนำให้เริ่มยา', note: 'หากใช้อยู่เดิมและ eGFR ลดลงต่ำกว่า 20 ควรพิจารณาหยุดหรือปรึกษาแพทย์เฉพาะทาง' }
+                ],
+                guidelines: [
+                    'eGFR ≥ 30: 10-25 mg/day',
+                    'eGFR 20-29: 10 mg/day (for CKD/HF benefit only)',
+                    'eGFR < 20: ไม่แนะนำ'
+                ]
+            },
+            'glibenclamide': {
+                name: 'Glibenclamide',
+                category: 'Antidiabetic (Sulfonylurea)',
+                param: 'eGFR',
+                reference: 'Thai Diabetes CPG',
+                rules: [
+                    { min: 60, max: 999, status: 'normal', title: 'Normal Dosing', dose: 'ขนาดยาปกติ', note: 'ระวังภาวะน้ำตาลในเลือดต่ำในผู้สูงอายุ' },
+                    { min: 0, max: 59.9, status: 'danger', title: 'Contraindicated', dose: 'ห้ามใช้ (Avoid Use)', note: 'เสี่ยงต่อภาวะ Prolonged Hypoglycemia อย่างรุนแรง ควรพิจารณาใช้กลุ่มอื่น' }
+                ],
+                guidelines: [
+                    'eGFR ≥ 60: ใช้ได้ตามปกติ',
+                    'eGFR < 60: 🔴 หลีกเลี่ยงการใช้ยา'
+                ]
+            },
+            'ibuprofen': {
+                name: 'Ibuprofen',
+                category: 'Analgesic (NSAID)',
+                param: 'eGFR',
+                reference: 'Pain Management Guidelines',
+                rules: [
+                    { min: 60, max: 999, status: 'normal', title: 'Normal Dosing', dose: 'ขนาดยาปกติ', note: 'ควรใช้ในระยะเวลาสั้นที่สุดที่จำเป็น' },
+                    { min: 30, max: 59.9, status: 'warning', title: 'Caution', dose: 'ใช้ด้วยความระมัดระวัง', note: 'อาจทำให้การทำงานของไตแย่ลง (AKI) หลีกเลี่ยงหากมีภาวะขาดน้ำ' },
+                    { min: 0, max: 29.9, status: 'danger', title: 'Contraindicated', dose: 'หลีกเลี่ยงการใช้ (Avoid Use)', note: 'ห้ามใช้ในผู้ป่วย CKD ระยะรุนแรง' }
+                ],
+                guidelines: [
+                    'eGFR ≥ 60: ใช้ได้อย่างระมัดระวัง',
+                    'eGFR 30-59: ระวังสูง อาจทำให้ AKI',
+                    'eGFR < 30: 🔴 หลีกเลี่ยง'
+                ]
+            },
+            'colchicine': {
+                name: 'Colchicine',
+                category: 'Anti-gout / Analgesic',
+                param: 'CrCl',
+                reference: 'Rheumatology Guidelines',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Acute Gout Flare', dose: '1.2 mg ทันที ตามด้วย 0.6 mg อีก 1 ชั่วโมง', note: 'จากนั้น 0.6 mg วันละ 1-2 ครั้ง' },
+                    { min: 10, max: 29.9, status: 'warning', title: 'Dose Adjustment Required', dose: 'ลดขนาดยา Treatment ลงครึ่งหนึ่ง', note: 'และห้ามให้ซ้ำภายใน 14 วัน สำหรับ Prophylaxis ให้ 0.3 mg วันละ 1 ครั้ง' },
+                    { min: 0, max: 9.9, status: 'danger', title: 'Severe Renal Impairment', dose: 'ห้ามใช้ (Contraindicated) ในการรักษา Acute flare', note: 'ลดขนาดยา Prophylaxis เป็น 0.3 mg วันเว้นวัน' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 30: ขนาดยาปกติ',
+                    'CrCl 10-29: ลดขนาดยาลง (ห้าม repeat ภายใน 2 สัปดาห์)',
+                    'CrCl < 10: 🔴 หลีกเลี่ยงสำหรับ Acute flare'
+                ]
+            },
+            'ranitidine': {
+                name: 'Ranitidine',
+                category: 'H2 Blocker / GI',
+                param: 'CrCl',
+                reference: 'Product Insert',
+                rules: [
+                    { min: 50, max: 999, status: 'normal', title: 'Normal Dosing', dose: '150 mg วันละ 2 ครั้ง', note: 'ขนาดยาปกติ' },
+                    { min: 0, max: 49.9, status: 'warning', title: 'Dose Adjustment Required', dose: '150 mg วันละ 1 ครั้ง', note: 'เสี่ยงต่ออาการข้างเคียงทางระบบประสาทหากไม่ปรับยา' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 50: 150 mg BID',
+                    'CrCl < 50: 150 mg OD'
+                ]
+            },
+            'rivaroxaban': {
+                name: 'Rivaroxaban',
+                category: 'DOAC / Anticoagulant',
+                param: 'CrCl',
+                reference: 'Product Insert (AFib Dosing)',
+                rules: [
+                    { min: 50, max: 999, status: 'normal', title: 'Normal Dosing', dose: '20 mg วันละ 1 ครั้ง พร้อมอาหาร', note: 'สำหรับลดความเสี่ยง Stroke ใน Non-valvular AF' },
+                    { min: 15, max: 49.9, status: 'warning', title: 'Dose Adjustment Required', dose: '15 mg วันละ 1 ครั้ง พร้อมอาหาร', note: 'ลดขนาดยาเพื่อลดความเสี่ยงเลือดออก' },
+                    { min: 0, max: 14.9, status: 'danger', title: 'Contraindicated', dose: 'หลีกเลี่ยงการใช้ (Avoid Use)', note: 'ไม่แนะนำในผู้ป่วยที่ CrCl < 15' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 50: 20 mg OD',
+                    'CrCl 15-49: 15 mg OD',
+                    'CrCl < 15: 🔴 Avoid'
+                ]
+            },
+            'gabapentin': {
+                name: 'Gabapentin',
+                category: 'Analgesic / Anticonvulsant',
+                param: 'CrCl',
+                reference: 'Product Insert',
+                rules: [
+                    { min: 60, max: 999, status: 'normal', title: 'Normal Dosing', dose: '300-1200 mg วันละ 3 ครั้ง', note: 'Max 3600 mg/day ปรับยาตามอาการปวดประสาท' },
+                    { min: 30, max: 59.9, status: 'warning', title: 'Dose Adjustment Required', dose: '200-700 mg วันละ 2 ครั้ง', note: 'ลดขนาดยาและความถี่ลงเพื่อลดผลข้างเคียง' },
+                    { min: 15, max: 29.9, status: 'warning', title: 'Severe Dose Adjustment', dose: '200-700 mg วันละ 1 ครั้ง', note: 'ระวังอาการง่วงซึม สับสน' },
+                    { min: 0, max: 14.9, status: 'danger', title: 'ESRD Dosing', dose: '100-300 mg วันละ 1 ครั้ง', note: 'สำหรับผู้ป่วยที่ไม่ได้ฟอกเลือด ให้ปรับลดขนาดยาอย่างระมัดระวัง' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 60: 300-1200 mg TID',
+                    'CrCl 30-59: 200-700 mg BID',
+                    'CrCl 15-29: 200-700 mg OD',
+                    'CrCl < 15: 100-300 mg OD'
+                ]
+            },
+            'spironolactone': {
+                name: 'Spironolactone',
+                category: 'Cardiovascular / Diuretic',
+                param: 'eGFR',
+                reference: 'Heart Failure Guidelines',
+                rules: [
+                    { min: 50, max: 999, status: 'normal', title: 'Normal Dosing', dose: '12.5 - 25 mg วันละ 1 ครั้ง', note: 'ติดตามระดับ Potassium อย่างใกล้ชิด' },
+                    { min: 30, max: 49.9, status: 'warning', title: 'Dose Adjustment Required', dose: '12.5 mg วันละ 1 ครั้ง หรือวันเว้นวัน', note: 'ระวัง Hyperkalemia แนะนำให้ตรวจเลือดติดตามผล' },
+                    { min: 0, max: 29.9, status: 'danger', title: 'Contraindicated', dose: 'ห้ามใช้ (Contraindicated)', note: 'ความเสี่ยง Hyperkalemia สูงมากจนเป็นอันตราย' }
+                ],
+                guidelines: [
+                    'eGFR ≥ 50: 12.5-25 mg OD',
+                    'eGFR 30-49: 12.5 mg OD or QOD',
+                    'eGFR < 30: 🔴 Contraindicated'
+                ]
+            },
+            'meropenem': {
+                name: 'Meropenem',
+                category: 'Antibiotic (Carbapenem)',
+                param: 'CrCl',
+                reference: 'Sanford Guide',
+                rules: [
+                    { min: 50, max: 999, status: 'normal', title: 'Normal Dosing', dose: '1g ทุก 8 ชั่วโมง', note: 'สำหรับ Severe infection' },
+                    { min: 26, max: 49.9, status: 'warning', title: 'Dose Adjustment Required', dose: '1g ทุก 12 ชั่วโมง', note: 'ขยายช่วงเวลาการให้ยา' },
+                    { min: 10, max: 25.9, status: 'warning', title: 'Severe Renal Impairment', dose: '500 mg ทุก 12 ชั่วโมง', note: 'ลดขนาดยาลงและขยายช่วงเวลา' },
+                    { min: 0, max: 9.9, status: 'danger', title: 'ESRD Dosing', dose: '500 mg ทุก 24 ชั่วโมง', note: 'ระวังอาการชัก (Seizure) จากการสะสมของยา' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 50: 1g q8h',
+                    'CrCl 26-49: 1g q12h',
+                    'CrCl 10-25: 500 mg q12h',
+                    'CrCl < 10: 500 mg q24h'
+                ]
+            },
+            'tramadol': {
+                name: 'Tramadol',
+                category: 'Analgesic (Opioid-like)',
+                param: 'CrCl',
+                reference: 'Pain Management Guidelines',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Normal Dosing', dose: '50-100 mg ทุก 4-6 ชั่วโมง', note: 'Max 400 mg/day ปรับยาตามอาการปวด' },
+                    { min: 0, max: 29.9, status: 'warning', title: 'Dose Adjustment Required', dose: '50-100 mg ทุก 12 ชั่วโมง', note: 'Max 200 mg/day ห้ามใช้รูปแบบออกฤทธิ์เนิ่น (Extended Release)' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 30: Normal (Max 400mg/day)',
+                    'CrCl < 30: q12h (Max 200mg/day), Avoid ER'
+                ]
+            },
+            'amitriptyline': {
+                name: 'Amitriptyline',
+                category: 'Antidepressant / Analgesic',
+                param: 'CrCl',
+                reference: 'Clinical Guidelines',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Normal Dosing', dose: '10 - 75 mg / วัน', note: 'ไม่ต้องปรับขนาดยา' },
+                    { min: 0, max: 29.9, status: 'warning', title: 'Caution', dose: 'เริ่มจากขนาดยาต่ำ', note: 'ไม่ต้องปรับขนาดยาตามค่าไตโดยตรง แต่ควรระวังผลข้างเคียง (Anticholinergic) ที่อาจเพิ่มขึ้นจากการสะสมของ Metabolite' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 30: ขนาดยาปกติ',
+                    'CrCl < 30: ระมัดระวังผลข้างเคียง เริ่มจากขนาดยาต่ำ'
+                ]
+            },
+            'piroxicam': {
+                name: 'Piroxicam',
+                category: 'Analgesic (NSAID)',
+                param: 'eGFR',
+                reference: 'Pain Management Guidelines',
+                rules: [
+                    { min: 60, max: 999, status: 'normal', title: 'Normal Dosing', dose: '10 - 20 mg / วัน', note: 'ใช้ในระยะเวลาสั้นที่สุดที่จำเป็น' },
+                    { min: 30, max: 59.9, status: 'warning', title: 'Caution', dose: 'ใช้ด้วยความระมัดระวัง', note: 'เสี่ยงต่อการเกิดภาวะไตวายเฉียบพลัน (AKI) หลีกเลี่ยงหากผู้ป่วยมีภาวะขาดน้ำ' },
+                    { min: 0, max: 29.9, status: 'danger', title: 'Contraindicated', dose: 'หลีกเลี่ยงการใช้ (Avoid Use)', note: 'ห้ามใช้ในผู้ป่วยโรคไตเรื้อรังระยะรุนแรง' }
+                ],
+                guidelines: [
+                    'eGFR ≥ 60: ใช้ได้อย่างระมัดระวัง',
+                    'eGFR 30-59: ระวังสูง อาจทำให้ AKI',
+                    'eGFR < 30: 🔴 หลีกเลี่ยง'
+                ]
+            },
+            'diclofenac': {
+                name: 'Diclofenac',
+                category: 'Analgesic (NSAID)',
+                param: 'eGFR',
+                reference: 'Pain Management Guidelines',
+                rules: [
+                    { min: 60, max: 999, status: 'normal', title: 'Normal Dosing', dose: 'ขนาดยาปกติ (เช่น 25-50 mg วันละ 2-3 ครั้ง)', note: 'ใช้ในระยะเวลาสั้นที่สุดที่จำเป็น' },
+                    { min: 30, max: 59.9, status: 'warning', title: 'Caution', dose: 'ใช้ด้วยความระมัดระวัง', note: 'เสี่ยงต่อการเกิด AKI และอาจทำให้ความดันโลหิตสูงขึ้น' },
+                    { min: 0, max: 29.9, status: 'danger', title: 'Contraindicated', dose: 'หลีกเลี่ยงการใช้ (Avoid Use)', note: 'ห้ามใช้ในผู้ป่วยโรคไตเรื้อรังระยะรุนแรง' }
+                ],
+                guidelines: [
+                    'eGFR ≥ 60: ใช้ได้อย่างระมัดระวัง',
+                    'eGFR 30-59: ระวังสูง อาจทำให้ AKI',
+                    'eGFR < 30: 🔴 หลีกเลี่ยง'
+                ]
+            },
+            'dexamethasone': {
+                name: 'Dexamethasone',
+                category: 'Corticosteroid',
+                param: 'CrCl',
+                reference: 'Product Insert',
+                rules: [
+                    { min: 0, max: 999, status: 'normal', title: 'Normal Dosing', dose: 'ขนาดยาปกติ', note: 'ไม่ต้องปรับขนาดยาในผู้ป่วยโรคไต (No renal dose adjustment required)' }
+                ],
+                guidelines: [
+                    'All CrCl ranges: ไม่ต้องปรับขนาดยา'
+                ]
+            },
+            'simvastatin': {
+                name: 'Simvastatin',
+                category: 'Cardiovascular (Statin)',
+                param: 'CrCl',
+                reference: 'Product Insert',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Normal Dosing', dose: '5 - 40 mg วันละ 1 ครั้ง', note: 'ไม่ต้องปรับขนาดยา' },
+                    { min: 0, max: 29.9, status: 'warning', title: 'Dose Adjustment Required', dose: 'เริ่ม 5 mg / วัน', note: 'ปรับเพิ่มยาอย่างระมัดระวัง (ระวังภาวะกล้ามเนื้อสลาย)' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 30: ปกติ (Max 40 mg/day)',
+                    'CrCl < 30: เริ่ม 5 mg/day'
+                ]
+            },
+            'amlodipine': {
+                name: 'Amlodipine',
+                category: 'Cardiovascular (CCB)',
+                param: 'CrCl',
+                reference: 'Clinical Guidelines',
+                rules: [
+                    { min: 0, max: 999, status: 'normal', title: 'Normal Dosing', dose: '5 - 10 mg วันละ 1 ครั้ง', note: 'ไม่ต้องปรับขนาดยาในผู้ป่วยโรคไต' }
+                ],
+                guidelines: [
+                    'All CrCl ranges: ไม่ต้องปรับขนาดยา'
+                ]
+            },
+            'diazepam': {
+                name: 'Diazepam',
+                category: 'Benzodiazepine',
+                param: 'CrCl',
+                reference: 'Clinical Guidelines',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Normal Dosing', dose: 'ขนาดยาปกติ', note: 'ผู้สูงอายุควรเริ่มในขนาดต่ำ' },
+                    { min: 0, max: 29.9, status: 'warning', title: 'Caution', dose: 'เริ่มขนาดยาต่ำ หรือพิจารณาใช้ตัวอื่น', note: 'ระวังการสะสมของ Active metabolites อาจทำให้ง่วงซึมยาวนาน' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 30: ขนาดยาปกติ',
+                    'CrCl < 30: ระวังการสะสมของ Metabolites (พิจารณา Lorazepam แทน)'
+                ]
+            },
+            'clonazepam': {
+                name: 'Clonazepam',
+                category: 'Benzodiazepine',
+                param: 'CrCl',
+                reference: 'Clinical Guidelines',
+                rules: [
+                    { min: 0, max: 999, status: 'normal', title: 'Normal Dosing', dose: 'ขนาดยาปกติ', note: 'ไม่ต้องปรับขนาดยา แต่ควรใช้ด้วยความระมัดระวังในผู้ป่วย ESRD' }
+                ],
+                guidelines: [
+                    'All CrCl ranges: ไม่ต้องปรับขนาดยา'
+                ]
+            },
+            'lorazepam': {
+                name: 'Lorazepam',
+                category: 'Benzodiazepine',
+                param: 'CrCl',
+                reference: 'Clinical Guidelines',
+                rules: [
+                    { min: 0, max: 999, status: 'normal', title: 'Normal Dosing', dose: 'ขนาดยาปกติ', note: 'ปลอดภัยกว่า Diazepam ในผู้ป่วยโรคไต เนื่องจากไม่มี Active metabolites' }
+                ],
+                guidelines: [
+                    'All CrCl ranges: ไม่ต้องปรับขนาดยา'
+                ]
+            },
+            'amoxicillin': {
+                name: 'Amoxicillin',
+                category: 'Antibiotic (Penicillin)',
+                param: 'CrCl',
+                reference: 'Sanford Guide',
+                rules: [
+                    { min: 30, max: 999, status: 'normal', title: 'Normal Dosing', dose: '250 - 500 mg ทุก 8 ชั่วโมง', note: 'หรือ 500 - 875 mg ทุก 12 ชั่วโมง' },
+                    { min: 10, max: 29.9, status: 'warning', title: 'Dose Adjustment Required', dose: '250 - 500 mg ทุก 12 ชั่วโมง', note: 'ลดความถี่การให้ยา' },
+                    { min: 0, max: 9.9, status: 'danger', title: 'Severe Renal Impairment', dose: '250 - 500 mg ทุก 24 ชั่วโมง', note: 'สำหรับผู้ป่วยฟอกเลือด ให้เพิ่มอีก 1 dose หลังฟอกเสร็จ' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 30: q8h หรือ q12h',
+                    'CrCl 10-29: q12h',
+                    'CrCl < 10: q24h'
+                ]
+            },
+            'erythromycin': {
+                name: 'Erythromycin',
+                category: 'Antibiotic (Macrolide)',
+                param: 'CrCl',
+                reference: 'Sanford Guide',
+                rules: [
+                    { min: 10, max: 999, status: 'normal', title: 'Normal Dosing', dose: 'ขนาดยาปกติ', note: 'ไม่ต้องปรับขนาดยา' },
+                    { min: 0, max: 9.9, status: 'warning', title: 'Max Dose Limit', dose: 'สูงสุดไม่เกิน 1.5 g / วัน', note: 'ระวังผลข้างเคียงต่อการได้ยิน (Ototoxicity) ในผู้ป่วยไตวายรุนแรง' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 10: ปกติ',
+                    'CrCl < 10: Max 1.5 g/day'
+                ]
+            },
+            'dapagliflozin': {
+                name: 'Dapagliflozin',
+                category: 'Antidiabetic (SGLT2i)',
+                param: 'eGFR',
+                reference: 'Thai CPG / KDIGO',
+                rules: [
+                    { min: 25, max: 999, status: 'normal', title: 'Normal Dosing', dose: '10 mg วันละ 1 ครั้ง', note: 'ขนาดยาปกติ (ประสิทธิภาพลดน้ำตาลจะลดลงหาก eGFR < 45 แต่ยังได้ประโยชน์ชะลอไตเสื่อม)' },
+                    { min: 0, max: 24.9, status: 'danger', title: 'Not Recommended', dose: 'ไม่แนะนำให้เริ่มยาใหม่', note: 'หากใช้อยู่เดิมและ eGFR ลดลงต่ำกว่า 25 พิจารณาปรึกษาแพทย์เฉพาะทาง' }
+                ],
+                guidelines: [
+                    'eGFR ≥ 25: 10 mg/day',
+                    'eGFR < 25: ไม่แนะนำให้เริ่มยา'
+                ]
+            },
+            'ceftazidime': {
+                name: 'Ceftazidime',
+                category: 'Antibiotic (Cephalosporin)',
+                param: 'CrCl',
+                reference: 'Sanford Guide',
+                rules: [
+                    { min: 51, max: 999, status: 'normal', title: 'Normal Dosing', dose: '1 - 2 g ทุก 8 ชั่วโมง', note: 'ขนาดยาขึ้นอยู่กับความรุนแรงของการติดเชื้อ' },
+                    { min: 31, max: 50, status: 'warning', title: 'Dose Adjustment Required', dose: '1 g ทุก 12 ชั่วโมง', note: 'ลดความถี่ในการให้ยา' },
+                    { min: 16, max: 30, status: 'warning', title: 'Dose Adjustment Required', dose: '1 g ทุก 24 ชั่วโมง', note: 'ลดความถี่ในการให้ยาลงอีก' },
+                    { min: 6, max: 15, status: 'danger', title: 'Severe Renal Impairment', dose: '500 mg ทุก 24 ชั่วโมง', note: 'ลดทั้งขนาดยาและความถี่' },
+                    { min: 0, max: 5.9, status: 'danger', title: 'ESRD Dosing', dose: '500 mg ทุก 48 ชั่วโมง', note: 'ให้ยาซ้ำหลังจากการฟอกเลือดเสร็จสิ้น' }
+                ],
+                guidelines: [
+                    'CrCl > 50: 1-2 g q8h',
+                    'CrCl 31-50: 1 g q12h',
+                    'CrCl 16-30: 1 g q24h',
+                    'CrCl 6-15: 500 mg q24h',
+                    'CrCl < 6: 500 mg q48h'
+                ]
+            },
+            'gentamicin': {
+                name: 'Gentamicin',
+                category: 'Antibiotic (Aminoglycoside)',
+                param: 'CrCl',
+                reference: 'Sanford Guide (Traditional Dosing)',
+                rules: [
+                    { min: 50, max: 999, status: 'normal', title: 'Normal Dosing', dose: '1 - 2.5 mg/kg ทุก 8 ชั่วโมง', note: 'ควรทำ Therapeutic Drug Monitoring (TDM) อย่างใกล้ชิด' },
+                    { min: 10, max: 49.9, status: 'warning', title: 'Dose Adjustment Required', dose: '1 - 2.5 mg/kg ทุก 12-24 ชั่วโมง', note: 'ปรับยืดระยะเวลาให้ยา ป้องกัน Nephrotoxicity' },
+                    { min: 0, max: 9.9, status: 'danger', title: 'Severe Renal Impairment', dose: '1 - 2.5 mg/kg ทุก 48-72 ชั่วโมง', note: 'เสี่ยงต่อไตวายเฉียบพลันและพิษต่อหู (Ototoxicity) สูงมาก' }
+                ],
+                guidelines: [
+                    'CrCl ≥ 50: q8h',
+                    'CrCl 10-49: q12-24h',
+                    'CrCl < 10: q48-72h',
+                    'Note: ควรติดตามระดับยาในเลือดเสมอ'
+                ]
+            }
+        };
+
+        function setGender(gender) {
+            patientGender = gender;
+            document.getElementById('btn-male').classList.remove('active');
+            document.getElementById('btn-female').classList.remove('active');
+            document.getElementById(`btn-${gender}`).classList.add('active');
+            calculateRenalFunction();
+        }
+
+        function calculateRenalFunction() {
+            const age = parseFloat(document.getElementById('input-age').value);
+            const weight = parseFloat(document.getElementById('input-weight').value);
+            const scr = parseFloat(document.getElementById('input-scr').value);
+            const searchInput = document.getElementById('drug-search');
+
+            if (!age || !weight || !scr) {
+                calculatedCrCl = null;
+                calculatedEGFR = null;
+                document.getElementById('val-crcl').innerText = '--';
+                document.getElementById('val-egfr').innerText = '--';
+                
+                const stageEl = document.getElementById('val-ckd-stage');
+                stageEl.innerText = 'Stage --';
+                stageEl.className = 'text-xs font-bold text-gray-400 mt-1 ml-5';
+                
+                updateColorIndicator('dot-crcl', null);
+                updateColorIndicator('dot-egfr', null);
+                
+                searchInput.disabled = true;
+                searchInput.placeholder = "Type Generic or Trade Name...";
+                return;
+            }
+
+            let crcl = ((140 - age) * weight) / (72 * scr);
+            if (patientGender === 'female') crcl *= 0.85;
+            calculatedCrCl = crcl.toFixed(1);
+
+            const k = patientGender === 'female' ? 0.7 : 0.9;
+            const a = patientGender === 'female' ? -0.241 : -0.302;
+            const scr_k = scr / k;
+            const min_term = Math.min(scr_k, 1);
+            const max_term = Math.max(scr_k, 1);
+            
+            let egfr = 142 * Math.pow(min_term, a) * Math.pow(max_term, -1.200) * Math.pow(0.9938, age);
+            if (patientGender === 'female') egfr *= 1.012;
+            calculatedEGFR = egfr.toFixed(1);
+
+            document.getElementById('val-crcl').innerText = calculatedCrCl;
+            document.getElementById('val-egfr').innerText = calculatedEGFR;
+            
+            // CKD Stage Evaluation
+            let stage = "";
+            let stageColor = "";
+            const e = parseFloat(calculatedEGFR);
+            if(e >= 90) { stage = "Stage 1 (Normal)"; stageColor = "text-green-600"; }
+            else if(e >= 60) { stage = "Stage 2 (Mild)"; stageColor = "text-green-500"; }
+            else if(e >= 45) { stage = "Stage 3a (Mild-Mod)"; stageColor = "text-yellow-600"; }
+            else if(e >= 30) { stage = "Stage 3b (Mod-Severe)"; stageColor = "text-orange-500"; }
+            else if(e >= 15) { stage = "Stage 4 (Severe)"; stageColor = "text-red-500"; }
+            else { stage = "Stage 5 (Kidney Failure)"; stageColor = "text-red-600"; }
+
+            const stageEl = document.getElementById('val-ckd-stage');
+            stageEl.innerText = stage;
+            stageEl.className = `text-xs font-bold mt-1 ml-5 ${stageColor}`;
+
+            updateColorIndicator('dot-crcl', calculatedCrCl);
+            updateColorIndicator('dot-egfr', calculatedEGFR);
+
+            searchInput.disabled = false;
+            searchInput.placeholder = "ค้นหายา... (เช่น Amoxicillin, Enalapril)";
+            
+            // Re-evaluate current drug if card is active
+            if (!document.getElementById('dosing-content').classList.contains('hidden')) {
+                const activeDrugName = document.getElementById('rec-drug-name').innerText;
+                const matchedEntry = Object.entries(drugDatabase).find(([k, v]) => v.name === activeDrugName);
+                if(matchedEntry) selectDrug(matchedEntry[0]);
+            }
+        }
+
+        function updateColorIndicator(elementId, value) {
+            const el = document.getElementById(elementId);
+            el.className = 'w-2.5 h-2.5 rounded-full mr-3 inline-block'; 
+            if (value === null) el.classList.add(elementId === 'dot-crcl' ? 'bg-gray-500' : 'bg-gray-400');
+            else if (value >= 60) el.classList.add('bg-green-500');
+            else if (value >= 30) el.classList.add('bg-yellow-400');
+            else if (value >= 15) el.classList.add('bg-orange-500');
+            else el.classList.add('bg-red-500');
+        }
+
+        // --- Search System ---
+        function filterCategory(cat) {
+            const searchInput = document.getElementById('drug-search');
+            searchInput.value = cat;
+            triggerSearch(cat);
+        }
+
+        function triggerSearch(term) {
+            term = term.toLowerCase();
+            const searchDropdown = document.getElementById('search-dropdown');
+            searchDropdown.innerHTML = '';
+            
+            if (term.length < 1) {
+                searchDropdown.classList.add('hidden');
+                return;
+            }
+
+            const matches = Object.entries(drugDatabase).filter(([key, drug]) =>
+                drug.name.toLowerCase().includes(term) || drug.category.toLowerCase().includes(term)
+            );
+
+            if (matches.length > 0) {
+                searchDropdown.classList.remove('hidden');
+                matches.forEach(([key, drug]) => {
+                    const div = document.createElement('div');
+                    div.className = 'px-5 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors';
+                    div.innerHTML = `<div class="font-medium text-gray-800">${drug.name}</div><div class="text-xs text-gray-500">${drug.category}</div>`;
+                    div.onclick = () => {
+                        selectDrug(key);
+                        document.getElementById('drug-search').value = drug.name;
+                        searchDropdown.classList.add('hidden');
+                    };
+                    searchDropdown.appendChild(div);
+                });
+            } else {
+                searchDropdown.classList.remove('hidden');
+                searchDropdown.innerHTML = `<div class="px-5 py-3 text-sm text-gray-500 text-center">ไม่พบข้อมูลยา</div>`;
+            }
+        }
+
+        function renderAllDrugsList() {
+            const listEl = document.getElementById('all-drugs-list');
+            const countEl = document.getElementById('drug-count');
+            listEl.innerHTML = '';
+            
+            // Sort drugs alphabetically by name
+            const sortedDrugs = Object.entries(drugDatabase).sort((a, b) => 
+                a[1].name.localeCompare(b[1].name)
+            );
+
+            if(countEl) countEl.innerText = `${sortedDrugs.length} items`;
+
+            sortedDrugs.forEach(([key, drug]) => {
+                const btn = document.createElement('button');
+                btn.onclick = () => selectDrug(key);
+                btn.className = "w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 hover:border-gray-200 transition-all group shadow-sm";
+                btn.innerHTML = `
+                    <div class="flex flex-col items-start text-left">
+                        <span class="text-sm font-medium text-gray-700">${drug.name}</span>
+                        <span class="text-xs text-gray-400 mt-0.5">${drug.category}</span>
+                    </div>
+                    <span class="text-gray-300 group-hover:text-gray-500 transition-transform group-hover:translate-x-1">→</span>
+                `;
+                listEl.appendChild(btn);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAllDrugsList(); // Render full list on load
+
+            // Add Auto-compute listeners
+            document.getElementById('input-age').addEventListener('input', calculateRenalFunction);
+            document.getElementById('input-weight').addEventListener('input', calculateRenalFunction);
+            document.getElementById('input-scr').addEventListener('input', calculateRenalFunction);
+            
+            const searchInput = document.getElementById('drug-search');
+            searchInput.addEventListener('input', (e) => triggerSearch(e.target.value));
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const searchDropdown = document.getElementById('search-dropdown');
+                if(!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+                    searchDropdown.classList.add('hidden');
+                }
+            });
+        });
+
+        function selectDrug(drugId) {
+            if (!calculatedCrCl || !calculatedEGFR) {
+                alert("Please calculate renal function first.");
+                return;
+            }
+
+            const drug = drugDatabase[drugId];
+            if (!drug) return;
+
+            document.getElementById('dosing-empty-state').classList.add('hidden');
+            document.getElementById('dosing-content').classList.remove('hidden');
+
+            document.getElementById('rec-drug-name').innerText = drug.name;
+            document.getElementById('rec-drug-cat').innerText = drug.category;
+            
+            const valToUse = drug.param === 'eGFR' ? parseFloat(calculatedEGFR) : parseFloat(calculatedCrCl);
+            document.getElementById('rec-param-name').innerText = drug.param;
+            document.getElementById('rec-param-val').innerText = valToUse;
+
+            const matchedRule = drug.rules.find(r => valToUse >= r.min && valToUse <= r.max);
+            
+            const container = document.getElementById('dosing-container');
+            const alertBox = document.getElementById('rec-alert-box');
+            
+            // รีเซ็ตคลาสสีพื้นหลัง
+            container.classList.remove('bg-empty-ref', 'bg-purple-ref', 'bg-red-ref', 'bg-green-ref');
+
+            if (matchedRule) {
+                document.getElementById('rec-status-title').innerText = matchedRule.title;
+                document.getElementById('rec-dose').innerText = matchedRule.dose;
+                document.getElementById('rec-note').innerText = matchedRule.note;
+                
+                // เปลี่ยนสี Background ของ Card หลักตามสไตล์ Reference (Vibrant colors)
+                if (matchedRule.status === 'normal') {
+                    container.classList.add('bg-green-ref');
+                    document.getElementById('rec-icon').innerText = '✅';
+                    alertBox.className = 'bg-white rounded-[24px] p-6 mb-8 shadow-sm';
+                } else if (matchedRule.status === 'warning') {
+                    container.classList.add('bg-purple-ref'); // ใช้สีม่วงเหมือนการ์ด Product planning ใน ref
+                    document.getElementById('rec-icon').innerText = '⚠️';
+                    alertBox.className = 'bg-white rounded-[24px] p-6 mb-8 shadow-sm';
+                } else {
+                    container.classList.add('bg-red-ref'); // ใช้สีแดงเหมือนการ์ด Roadmap ใน ref
+                    document.getElementById('rec-icon').innerText = '🛑';
+                    alertBox.className = 'bg-white/20 backdrop-blur-md text-white rounded-[24px] p-6 mb-8 border border-white/30 shadow-sm';
+                    // เปลี่ยนสีตัวอักษรในกล่องแดงให้เป็นสีขาว
+                    document.getElementById('rec-status-title').classList.replace('text-gray-900', 'text-white');
+                    document.getElementById('rec-dose').classList.replace('text-gray-800', 'text-white');
+                    document.getElementById('rec-note').classList.replace('text-gray-600', 'text-white');
+                }
+                
+                // รีเซ็ตสีตัวอักษรถ้าไม่ได้อยู่ในสถานะ danger (เพราะสถานะอื่นกล่องเป็นสีขาว)
+                if (matchedRule.status !== 'danger') {
+                     document.getElementById('rec-status-title').classList.replace('text-white', 'text-gray-900');
+                     document.getElementById('rec-dose').classList.replace('text-white', 'text-gray-800');
+                     document.getElementById('rec-note').classList.replace('text-white', 'text-gray-600');
+                }
+
+            }
+
+            document.getElementById('rec-guideline-title') ? document.getElementById('rec-guideline-title').innerText = `Full Guidelines:` : null;
+            const listEl = document.getElementById('rec-guideline-list');
+            listEl.innerHTML = '';
+            drug.guidelines.forEach(g => {
+                const li = document.createElement('li');
+                li.className = "flex items-start before:content-['•'] before:mr-2 before:font-bold";
+                li.innerText = g;
+                listEl.appendChild(li);
+            });
+
+            document.getElementById('rec-reference').innerText = drug.reference;
+        }
+    </script>
+</body>
+</html>
