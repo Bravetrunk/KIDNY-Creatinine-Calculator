@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Renal Dose Calculator (Thai CPG)</title>
+    <title>KIDNY — Renal Dose Calculator</title>
     <!-- ใช้ Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- ใช้ Font Inter เพื่อความคล้ายคลึงกับ SF Pro ใน Reference -->
@@ -13,8 +13,45 @@
             background-color: #f2f1f6; /* สีพื้นหลังม่วงเทาอ่อนๆ สบายตา */
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
+            position: relative;
+            overflow-x: hidden;
         }
-        
+
+        /* Liquid background blobs */
+        .liquid-blob {
+            position: fixed;
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(70px);
+            opacity: 0.35;
+            border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+            animation: liquidMorph 16s ease-in-out infinite;
+        }
+        .liquid-blob.b1 { top: -140px; left: -120px; width: 420px; height: 420px; background: #c2a3ff; }
+        .liquid-blob.b2 { bottom: -160px; right: -130px; width: 480px; height: 480px; background: #d1fae5; animation-delay: -5s; }
+        .liquid-blob.b3 { top: 45%; right: 6%; width: 300px; height: 300px; background: #ffd7d7; animation-delay: -10s; }
+
+        @keyframes liquidMorph {
+            0%, 100% { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; transform: translate(0, 0) scale(1); }
+            25% { border-radius: 58% 42% 35% 65% / 63% 39% 61% 37%; transform: translate(20px, -15px) scale(1.06); }
+            50% { border-radius: 50% 50% 33% 67% / 27% 68% 32% 73%; transform: translate(-15px, 20px) scale(0.96); }
+            75% { border-radius: 33% 67% 58% 42% / 63% 45% 55% 37%; transform: translate(15px, 12px) scale(1.03); }
+        }
+
+        /* Liquid "pop" when a category pill becomes active */
+        @keyframes pillLiquid {
+            0% { border-radius: 9999px; transform: scale(1); }
+            50% { border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%; transform: scale(1.08); }
+            100% { border-radius: 9999px; transform: scale(1); }
+        }
+        .cat-pill.liquid-pop { animation: pillLiquid 0.45s ease; }
+
+        /* Page content sits above the liquid blobs */
+        .page-content {
+            position: relative;
+            z-index: 1;
+        }
+
         /* สไตล์ Card โค้งมนแบบ Reference */
         .bento-card {
             background-color: #ffffff;
@@ -35,9 +72,66 @@
 
         .soft-input:focus {
             background-color: #ffffff;
-            border-color: #c2a3ff; /* สีม่วงตาม Reference */
+            border-color: #6366f1; /* indigo-500: clear, accessible focus indicator */
             outline: none;
-            box-shadow: 0 4px 12px rgba(194, 163, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Calculator card: input shell with inline unit suffix */
+        .calc-field-shell {
+            background-color: #ffffff;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            border-radius: 12px; /* rounded-xl */
+            padding: 0.625rem 0.875rem; /* py-2.5 px-3.5 */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .calc-field-shell:hover {
+            border-color: #9ca3af; /* gray-400 */
+        }
+
+        .calc-field-shell:focus-within {
+            border-color: #6366f1; /* indigo-500 */
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); /* ring-2 ring-indigo-500/20 */
+        }
+
+        .calc-field-shell.warn {
+            border-color: #fbbf24; /* amber-400 */
+        }
+
+        .calc-field-shell.warn:focus-within {
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.25);
+        }
+
+        .calc-field-shell.error {
+            border-color: #ef4444; /* red-500 */
+        }
+
+        .calc-field-shell.error:focus-within {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+        }
+
+        .calc-field-value {
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            min-width: 0;
+            padding: 0;
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            color: #111827; /* gray-900 */
+        }
+
+        .calc-field-value::placeholder {
+            color: #9ca3af;
+            font-weight: 500;
         }
 
         /* ซ่อนลูกศรใน input number */
@@ -45,27 +139,6 @@
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
             margin: 0; 
-        }
-
-        /* Toggle ปุ่มเพศสไตล์ Pill */
-        .pill-toggle {
-            background-color: #f4f4f5;
-            border-radius: 9999px;
-            padding: 4px;
-            display: flex;
-        }
-        
-        .pill-btn {
-            border-radius: 9999px;
-            color: #6b7280;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .pill-btn.active {
-            background-color: #c2a3ff; /* สีม่วง */
-            color: #111827;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            font-weight: 600;
         }
 
         /* ปุ่ม Calculate เข้มๆ แบบ Reference */
@@ -91,187 +164,335 @@
         .bg-red-ref { background-color: #ff5d5d; }    /* สีแดงอมส้ม */
         .bg-green-ref { background-color: #d1fae5; }  /* สีเขียวอ่อน */
         .bg-empty-ref { background-color: #e5e7eb; }  /* สีเทา State ว่าง */
+
+        /* Auto-calc feedback: brief flash on Renal Function numbers */
+        @keyframes valuePulse {
+            0% { transform: scale(1); color: #111827; }
+            35% { transform: scale(1.18); color: #4f46e5; }
+            100% { transform: scale(1); color: #111827; }
+        }
+        .result-value.pulse {
+            display: inline-block;
+            animation: valuePulse 0.5s ease-in-out;
+        }
+
+        /* Drug grid card */
+        .drug-card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+        .drug-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px -8px rgba(0,0,0,0.14);
+        }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-6 lg:p-8">
 
-    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        
-        <!-- ==================== คอลัมน์ซ้าย (Input & Search) ==================== -->
-        <div class="col-span-1 lg:col-span-5 flex flex-col gap-6 lg:gap-8">
-            
+    <!-- Liquid animated background blobs -->
+    <div class="liquid-blob b1"></div>
+    <div class="liquid-blob b2"></div>
+    <div class="liquid-blob b3"></div>
+
+    <!-- Page Header -->
+    <header class="page-content max-w-[1600px] mx-auto mb-6 lg:mb-8 px-1">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-[#c2a3ff] flex items-center justify-center text-xl shrink-0">🩺</div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 tracking-tight leading-none">KIDNY</h1>
+                <p class="text-sm text-gray-600 mt-1">Renal Dose Calculator</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-content max-w-[1600px] mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+
+        <!-- ==================== Sidebar (Patient Inputs, sticky) ==================== -->
+        <aside class="w-full lg:w-[30%] lg:shrink-0 lg:sticky lg:top-8 lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto flex flex-col gap-6 lg:gap-8 pr-0.5">
+
             <!-- 1. Input & Calculator Card -->
-            <div class="bento-card">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">Calculator</h2>
-                    <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full font-medium">Renal Dose</span>
                 </div>
-                
-                <div class="space-y-5">
+
+                <div class="space-y-4">
                     <!-- Age -->
-                    <div class="flex items-center justify-between">
-                        <label class="text-sm font-medium text-gray-600">Age (Years)</label>
-                        <input type="number" id="input-age" class="soft-input px-4 py-2 w-28 text-center text-lg" placeholder="e.g. 65">
+                    <div class="flex flex-col">
+                        <label for="input-age" class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Age</label>
+                        <div id="shell-age" class="calc-field-shell">
+                            <input type="number" id="input-age" class="calc-field-value" placeholder="65" aria-describedby="hint-age">
+                            <span class="text-sm text-gray-600 font-medium shrink-0">years</span>
+                        </div>
+                        <p id="hint-age" class="text-[11px] text-gray-500 mt-1"></p>
                     </div>
-                    
+
                     <!-- Gender Toggle -->
-                    <div class="flex items-center justify-between">
-                        <label class="text-sm font-medium text-gray-600">Gender</label>
-                        <div class="pill-toggle w-40">
-                            <button onclick="setGender('male')" id="btn-male" class="pill-btn active flex-1 py-2 text-sm">Male</button>
-                            <button onclick="setGender('female')" id="btn-female" class="pill-btn flex-1 py-2 text-sm">Female</button>
+                    <div class="flex flex-col">
+                        <label class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Gender</label>
+                        <div class="bg-gray-100 p-1 rounded-xl flex gap-1">
+                            <button type="button" onclick="setGender('male')" id="btn-male" class="flex-1 py-2 text-sm rounded-lg transition-all bg-white text-indigo-600 font-semibold shadow-sm">Male</button>
+                            <button type="button" onclick="setGender('female')" id="btn-female" class="flex-1 py-2 text-sm rounded-lg transition-all text-gray-500 hover:text-gray-700 font-medium">Female</button>
                         </div>
                     </div>
 
                     <!-- Weight -->
-                    <div class="flex items-center justify-between">
-                        <label class="text-sm font-medium text-gray-600">Weight (kg)</label>
-                        <input type="number" id="input-weight" class="soft-input px-4 py-2 w-28 text-center text-lg" placeholder="e.g. 70">
+                    <div class="flex flex-col">
+                        <label for="input-weight" class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Weight</label>
+                        <div id="shell-weight" class="calc-field-shell">
+                            <input type="number" id="input-weight" class="calc-field-value" placeholder="70" aria-describedby="hint-weight">
+                            <span class="text-sm text-gray-600 font-medium shrink-0">kg</span>
+                        </div>
+                        <p id="hint-weight" class="text-[11px] text-gray-500 mt-1"></p>
                     </div>
 
                     <!-- SCr -->
-                    <div class="flex items-center justify-between">
-                        <label class="text-sm font-medium text-gray-600">SCr (mg/dL)</label>
-                        <input type="number" id="input-scr" step="0.1" class="soft-input px-4 py-2 w-28 text-center text-lg" placeholder="e.g. 1.2">
+                    <div class="flex flex-col">
+                        <label for="input-scr" class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">SCr</label>
+                        <div id="shell-scr" class="calc-field-shell">
+                            <input type="number" id="input-scr" step="0.1" class="calc-field-value" placeholder="1.2" aria-describedby="hint-scr">
+                            <span class="text-sm text-gray-600 font-medium shrink-0">mg/dL</span>
+                        </div>
+                        <p id="hint-scr" class="text-[11px] text-gray-500 mt-1"></p>
+                    </div>
+                </div>
+
+                <!-- Reset: moved to the bottom as a subtle secondary action, away from the top-edge misclick zone on mobile -->
+                <div class="flex justify-center mt-2">
+                    <button type="button" onclick="resetCalculator()" class="text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 cursor-pointer transition-colors px-4 py-2.5 rounded-lg">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Renal Function Card -->
+            <div class="bento-card">
+                <div class="flex items-center gap-2 mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">Renal Function</h2>
+                    <svg id="renal-spinner" class="hidden w-4 h-4 text-indigo-500 animate-spin" viewBox="0 0 24 24" fill="none" aria-label="Recalculating">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                </div>
+
+                <!-- Results Display -->
+                <div class="flex flex-col gap-3">
+                    <div class="stat-block flex items-center justify-between bg-gray-50 border border-gray-100 p-4 rounded-2xl">
+                        <div class="flex items-center">
+                            <span id="dot-crcl" class="w-2.5 h-2.5 rounded-full bg-gray-300 mr-3"></span>
+                            <span class="text-sm font-medium text-gray-600">CrCl (CG)</span>
+                        </div>
+                        <div class="flex items-baseline">
+                            <span id="val-crcl" class="result-value text-xl font-bold text-gray-900">--</span>
+                            <span class="text-xs text-gray-600 ml-1">ml/min</span>
+                        </div>
+                    </div>
+                    <div class="stat-block flex items-center justify-between bg-gray-50 border border-gray-100 p-4 rounded-2xl">
+                        <div class="flex flex-col">
+                            <div class="flex items-center">
+                                <span id="dot-egfr" class="w-2.5 h-2.5 rounded-full bg-gray-300 mr-3"></span>
+                                <span class="text-sm font-medium text-gray-600">eGFR (CKD-EPI)</span>
+                            </div>
+                            <span id="val-ckd-stage" class="text-xs font-bold text-gray-500 mt-1 ml-5">Stage --</span>
+                        </div>
+                        <div class="flex items-baseline">
+                            <span id="val-egfr" class="result-value text-xl font-bold text-gray-900">--</span>
+                            <span class="text-xs text-gray-600 ml-1">ml/min/1.73m²</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. Results & Search Card -->
-            <div class="bento-card">
-                <h2 class="text-2xl font-semibold text-gray-900 tracking-tight mb-6">Search</h2>
-                
-                <!-- Results Display (Pill style) -->
-                <div class="flex flex-col gap-3 mb-6">
-                    <div class="flex items-center justify-between bg-[#222222] text-white p-4 rounded-2xl">
-                        <div class="flex items-center">
-                            <span id="dot-crcl" class="w-2.5 h-2.5 rounded-full bg-gray-500 mr-3"></span>
-                            <span class="text-sm font-medium text-gray-300">CrCl (CG)</span>
-                        </div>
-                        <div class="flex items-baseline">
-                            <span id="val-crcl" class="text-xl font-bold">--</span>
-                            <span class="text-xs text-gray-400 ml-1">ml/min</span>
-                        </div>
+            <!-- 3. Dosing Recommendation (quick single-drug check) -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <h2 class="text-2xl font-semibold text-gray-900 tracking-tight mb-4">Dosing Recommendation</h2>
+
+                <!-- Drug search -->
+                <div class="relative">
+                    <svg class="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="qc-search" class="soft-input w-full pl-10 pr-9 py-2.5 text-sm rounded-full" placeholder="Search a drug, e.g. Meropenem...">
+                    <button id="qc-clear" type="button" onclick="clearQuickCheck()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" aria-label="Clear selection">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                    <div id="qc-dropdown" class="hidden absolute z-40 w-full bg-white mt-2 rounded-2xl shadow-xl border border-gray-100 max-h-56 overflow-y-auto"></div>
+                </div>
+
+                <p id="qc-empty" class="text-[13px] text-gray-500 mt-3">Search and select a drug to see its renal-adjusted dose.</p>
+
+                <!-- Selected drug -->
+                <div id="qc-result" class="hidden mt-4">
+                    <div id="qc-drug-name" class="text-lg font-bold text-gray-900 leading-snug">--</div>
+                    <div id="qc-drug-cat" class="text-sm text-gray-600">--</div>
+
+                    <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100">
+                        <span id="qc-param-dot" class="w-2 h-2 rounded-full bg-gray-300 shrink-0"></span>
+                        <span class="text-xs font-semibold text-gray-700">Based on <span id="qc-param-name">CrCl</span> (<span id="qc-param-method">Cockcroft-Gault</span>): <span id="qc-param-val">--</span></span>
                     </div>
-                    <div class="flex items-center justify-between bg-gray-100 p-4 rounded-2xl">
-                        <div class="flex flex-col">
-                            <div class="flex items-center">
-                                <span id="dot-egfr" class="w-2.5 h-2.5 rounded-full bg-gray-400 mr-3"></span>
-                                <span class="text-sm font-medium text-gray-600">eGFR (CKD-EPI)</span>
-                            </div>
-                            <span id="val-ckd-stage" class="text-xs font-bold text-gray-400 mt-1 ml-5">Stage --</span>
+
+                    <!-- Prompt while patient inputs are incomplete -->
+                    <p id="qc-need-calc" class="hidden text-[13px] text-gray-500 mt-4">Enter Age, Weight and SCr above to calculate the renal-adjusted dose.</p>
+
+                    <!-- Dose comparison -->
+                    <div id="qc-dose-block" class="hidden">
+                        <div id="qc-danger-banner" class="hidden mt-4 bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 flex items-start gap-2 text-sm">
+                            <span class="shrink-0">🛑</span>
+                            <span id="qc-danger-text"></span>
                         </div>
-                        <div class="flex items-baseline">
-                            <span id="val-egfr" class="text-xl font-bold text-gray-900">--</span>
-                            <span class="text-xs text-gray-500 ml-1">ml/min/1.73m²</span>
+
+                        <div class="mt-4">
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Standard Dose</div>
+                            <div id="qc-standard-dose" class="text-sm text-gray-500 mt-0.5">--</div>
+                        </div>
+
+                        <div id="qc-arrow-row" class="flex justify-center py-1">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                        </div>
+
+                        <div>
+                            <div class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Renal Adjusted Dose</div>
+                            <div id="qc-adjusted-dose" class="text-2xl font-extrabold text-indigo-700 leading-tight mt-0.5">--</div>
+                            <span id="qc-badge" class="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mt-2">--</span>
+                        </div>
+
+                        <p id="qc-note" class="text-sm text-gray-600 mt-3"></p>
+
+                        <div class="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-gray-100">
+                            <p class="text-[11px] text-gray-500">Source: <span id="qc-reference">--</span></p>
+                            <button type="button" onclick="openDrugModal(quickCheckDrugKey)" class="shrink-0 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">Full guidelines →</button>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Search Input -->
-                <div class="relative mb-5">
-                    <input type="text" id="drug-search" disabled class="soft-input w-full px-5 py-3.5 pl-12 text-sm disabled:opacity-50 disabled:bg-gray-100 rounded-full" placeholder="Type Generic or Trade Name...">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-4 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <!-- Search Dropdown -->
-                    <div id="search-dropdown" class="absolute z-50 w-full bg-white mt-2 rounded-2xl shadow-xl border border-gray-100 hidden max-h-60 overflow-y-auto"></div>
+        </aside>
+
+        <!-- ==================== Main content (Search + Dosing Recommendations) ==================== -->
+        <main class="w-full lg:flex-1 min-w-0 flex flex-col gap-6 lg:gap-8">
+
+            <!-- 3. Medications (Search + Dosing Recommendations merged) -->
+            <div class="bento-card relative">
+                <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">Dosing Recommendations</h2>
+                        <span id="dashboard-drug-count" class="inline-block mt-2 bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full font-medium">-- drugs</span>
+                    </div>
+
+                    <!-- Search (top right) -->
+                    <div class="relative w-full sm:w-64">
+                        <input type="text" id="drug-search" disabled class="soft-input w-full pl-10 pr-4 py-2.5 text-sm disabled:opacity-50 disabled:bg-gray-100 rounded-full" placeholder="Search">
+                        <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
                 </div>
 
                 <!-- Categories -->
-                <div class="mb-6">
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="filterCategory('Antidiabetic')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Antidiabetics</button>
-                        <button onclick="filterCategory('Antibiotic')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Antibiotics</button>
-                        <button onclick="filterCategory('Cardiovascular')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Cardiovascular</button>
-                        <button onclick="filterCategory('Analgesic')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Analgesics</button>
-                        <button onclick="filterCategory('H2 Blocker')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">H2 Blockers</button>
-                        <button onclick="filterCategory('Quinolone')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Quinolones</button>
-                        <button onclick="filterCategory('Cephalosporin')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Cephalosporins</button>
-                        <button onclick="filterCategory('Aminoglycoside')" class="bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Aminoglycosides</button>
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <button data-category="Antidiabetic" onclick="filterCategory('Antidiabetic', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Antidiabetics</button>
+                    <button data-category="Antibiotic" onclick="filterCategory('Antibiotic', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Antibiotics</button>
+                    <button data-category="Cardiovascular" onclick="filterCategory('Cardiovascular', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Cardiovascular</button>
+                    <button data-category="Analgesic" onclick="filterCategory('Analgesic', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Analgesics</button>
+                    <button data-category="H2 Blocker" onclick="filterCategory('H2 Blocker', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">H2 Blockers</button>
+                    <button data-category="Quinolone" onclick="filterCategory('Quinolone', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Quinolones</button>
+                    <button data-category="Cephalosporin" onclick="filterCategory('Cephalosporin', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Cephalosporins</button>
+                    <button data-category="Aminoglycoside" onclick="filterCategory('Aminoglycoside', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Aminoglycosides</button>
+                </div>
+
+                <!-- Empty State -->
+                <div id="grid-empty-state" class="flex flex-col items-center justify-center text-center py-20 px-8">
+                    <div class="bg-gray-50 p-5 rounded-full shadow-sm mb-4">
+                        <svg class="w-11 h-11 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.5 20.5L20.5 10.5C22.5 8.5 22.5 5.5 20.5 3.5C18.5 1.5 15.5 1.5 13.5 3.5L3.5 13.5C1.5 15.5 1.5 18.5 3.5 20.5C5.5 22.5 8.5 22.5 10.5 20.5Z"></path>
+                            <line x1="8.5" y1="8.5" x2="15.5" y2="15.5"></line>
+                        </svg>
+                    </div>
+                    <p class="font-medium text-gray-500">Please calculate renal function to view drug recommendations</p>
+                </div>
+
+                <!-- Skeleton Loading State -->
+                <div id="drug-grid-skeleton" class="hidden">
+                    <div class="h-5 w-44 bg-gray-200 rounded mb-4 animate-pulse"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
+                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
+                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
+                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
+                    </div>
+                    <div class="h-5 w-56 bg-gray-200 rounded mb-4 animate-pulse"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
+                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
+                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
                     </div>
                 </div>
 
-                <!-- All Drugs List (A-Z) -->
-                <div class="flex flex-col mt-2">
-                    <div class="flex justify-between items-center mb-3">
-                        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">All Drugs (A-Z)</div>
-                        <div id="drug-count" class="text-xs text-gray-400 font-medium bg-gray-100 px-2 py-1 rounded-full">-- items</div>
+                <!-- No results for current search/category filter -->
+                <div id="grid-no-results" class="hidden flex-col items-center justify-center text-center py-16 px-8">
+                    <p class="font-medium text-gray-500">No drugs match your search</p>
+                </div>
+
+                <!-- Risk-grouped Sections -->
+                <div id="drug-grid-sections" class="hidden"></div>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Medical disclaimer -->
+    <footer class="page-content max-w-[1600px] mx-auto mt-8 lg:mt-10 px-1 pb-2">
+        <p class="text-xs text-gray-500 text-center leading-relaxed">
+            For informational purposes only and not a substitute for professional clinical judgment. Dosing recommendations should be verified against current prescribing information and institutional protocols before use.
+        </p>
+    </footer>
+
+    <!-- Drug Details Modal -->
+    <div id="drug-modal-backdrop" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-200" onclick="if(event.target===this) closeDrugModal()">
+        <div id="drug-modal-panel" class="bg-white w-full max-w-lg rounded-xl shadow-2xl max-h-[85vh] flex flex-col opacity-0 scale-95 transition-all duration-200 ease-out">
+
+            <!-- Header -->
+            <div class="flex items-start justify-between gap-4 p-6 border-b border-gray-100">
+                <div>
+                    <h3 id="modal-drug-name" class="text-2xl font-bold text-gray-900 tracking-tight">--</h3>
+                    <p id="modal-drug-cat" class="text-sm text-gray-600 mt-1">--</p>
+                    <div class="inline-flex items-center gap-2 mt-3 px-3 py-1 rounded-full bg-gray-50 border border-gray-100">
+                        <span id="modal-param-dot" class="w-2 h-2 rounded-full bg-gray-300"></span>
+                        <span class="text-xs font-semibold text-gray-600"><span id="modal-param-name">eGFR</span>: <span id="modal-param-val">--</span></span>
                     </div>
-                    
-                    <div id="all-drugs-list" class="space-y-2 max-h-[260px] overflow-y-auto pr-2 pb-2">
-                        <!-- Populated by JS -->
+                </div>
+                <button onclick="closeDrugModal()" class="shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 overflow-y-auto space-y-5">
+                <div id="modal-danger-banner" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 flex items-start gap-3">
+                    <span class="text-xl">🛑</span>
+                    <div>
+                        <div class="font-bold text-sm">Contraindicated</div>
+                        <div class="text-sm" id="modal-danger-text"></div>
                     </div>
                 </div>
 
+                <div>
+                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Recommended Dose</div>
+                    <div id="modal-dose" class="text-lg font-semibold text-gray-900">--</div>
+                </div>
+
+                <div>
+                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Clinical Notes</div>
+                    <div id="modal-note" class="text-sm text-gray-600">--</div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Full Guidelines</div>
+                    <ul id="modal-guideline-list" class="text-sm text-gray-700 space-y-1.5"></ul>
+                    <div class="text-xs text-gray-500 mt-3 pt-3 border-t border-gray-200">Ref: <span id="modal-reference">--</span></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex justify-end p-4 border-t border-gray-100">
+                <button onclick="closeDrugModal()" class="px-5 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-sm font-semibold text-gray-700 transition">Close</button>
             </div>
         </div>
-
-        <!-- ==================== คอลัมน์ขวา (Recommendation) ==================== -->
-        <div class="col-span-1 lg:col-span-7 h-full">
-            <!-- Container หลักที่จะเปลี่ยนสี Background ตามสถานะ (Vibrant Cards) -->
-            <div id="dosing-container" class="bento-card h-full min-h-[650px] flex flex-col relative overflow-hidden bg-empty-ref transition-colors duration-500 sticky top-8">
-                
-                <!-- Initial State -->
-                <div id="dosing-empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 p-8 text-center">
-                    <div class="bg-white p-4 rounded-full shadow-sm mb-4">
-                        <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    </div>
-                    <p class="font-medium">Please calculate renal function and select a drug</p>
-                </div>
-
-                <!-- Active State -->
-                <div id="dosing-content" class="hidden flex-1 flex flex-col z-10 relative">
-                    
-                    <!-- Top Pill (Reference style: "5:00-6:30 PM") -->
-                    <div class="flex justify-between items-start mb-6">
-                        <button class="w-10 h-10 bg-white/30 hover:bg-white/50 rounded-full flex items-center justify-center text-gray-900 transition backdrop-blur-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                        </button>
-                        
-                        <div class="bg-[#222222] text-white px-5 py-2 rounded-full flex items-center shadow-md">
-                            <span class="text-sm font-medium mr-2" id="rec-param-name">eGFR</span>
-                            <span class="text-sm font-bold bg-white/20 px-2 py-0.5 rounded-full" id="rec-param-val">42</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Header -->
-                    <div class="mb-8">
-                        <h2 id="rec-drug-name" class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-2">Metformin</h2>
-                        <p id="rec-drug-cat" class="text-gray-800 font-medium text-lg opacity-80">Antidiabetic</p>
-                    </div>
-
-                    <!-- Recommendation Alert Box (Red/White depending on context) -->
-                    <div id="rec-alert-box" class="bg-white rounded-[24px] p-6 mb-8 shadow-sm">
-                        <div class="flex items-center gap-3 mb-3">
-                            <span id="rec-icon" class="text-2xl">⚠️</span>
-                            <h3 id="rec-status-title" class="text-xl font-bold text-gray-900">Dose Adjustment Required</h3>
-                        </div>
-                        <div class="space-y-4 ml-1">
-                            <div>
-                                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Recommended Dose</div>
-                                <div id="rec-dose" class="text-lg font-semibold text-gray-800">ขนาดยาสูงสุดไม่เกิน 1,000 mg / วัน</div>
-                            </div>
-                            <div>
-                                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Clinical Note</div>
-                                <div id="rec-note" class="text-base text-gray-600">ควรติดตามการทำงานของไตอย่างใกล้ชิด</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Guidelines -->
-                    <div class="mt-auto bg-white/40 backdrop-blur-md rounded-[24px] p-6">
-                        <div class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider text-xs">Full Guidelines</div>
-                        <ul id="rec-guideline-list" class="text-sm text-gray-700 space-y-2 mb-4 font-medium">
-                            <!-- Populated by JS -->
-                        </ul>
-                        <div class="text-xs text-gray-600/80 font-medium pt-3 border-t border-white/30">
-                            Ref: <span id="rec-reference">Thai CPG</span>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <!-- JavaScript Logic -->
@@ -831,15 +1052,96 @@
             }
         };
 
+        let activeCategory = null;
+        let searchTerm = '';
+        let currentModalDrugKey = null;
+        let gridSkeletonTimer = null;
+        let quickCheckDrugKey = null;
+
         function setGender(gender) {
             patientGender = gender;
-            document.getElementById('btn-male').classList.remove('active');
-            document.getElementById('btn-female').classList.remove('active');
-            document.getElementById(`btn-${gender}`).classList.add('active');
+            setGenderSegmentActive(document.getElementById('btn-male'), gender === 'male');
+            setGenderSegmentActive(document.getElementById('btn-female'), gender === 'female');
             calculateRenalFunction();
         }
 
+        function setGenderSegmentActive(btn, isActive) {
+            if (isActive) {
+                btn.classList.remove('text-gray-500', 'hover:text-gray-700', 'font-medium');
+                btn.classList.add('bg-white', 'text-indigo-600', 'font-semibold', 'shadow-sm');
+            } else {
+                btn.classList.remove('bg-white', 'text-indigo-600', 'font-semibold', 'shadow-sm');
+                btn.classList.add('text-gray-500', 'hover:text-gray-700', 'font-medium');
+            }
+        }
+
+        function resetCalculator() {
+            document.getElementById('input-age').value = '';
+            document.getElementById('input-weight').value = '';
+            document.getElementById('input-scr').value = '';
+            validateAllFields();
+            setGender('male');
+        }
+
+        // --- Field validation: hard errors (unparseable input) take priority over
+        // clinical sanity-range warnings. Neither blocks calculation. ---
+        const FIELD_KEYS = ['age', 'weight', 'scr'];
+        const RANGE_RULES = {
+            weight: { min: 20, max: 250, unit: 'kg', label: 'Weight' },
+            scr: { min: 0.2, max: 10.0, unit: 'mg/dL', label: 'SCr' }
+        };
+        const ALERT_ICON = '<svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>';
+
+        function setFieldState(key, state, message) {
+            const shell = document.getElementById(`shell-${key}`);
+            const hint = document.getElementById(`hint-${key}`);
+            if (!shell || !hint) return;
+
+            shell.classList.remove('warn', 'error');
+            if (state === 'error') {
+                shell.classList.add('error');
+                hint.className = 'text-xs text-red-600 mt-1 flex items-center gap-1';
+                hint.innerHTML = `${ALERT_ICON}<span>${message}</span>`;
+            } else if (state === 'warn') {
+                shell.classList.add('warn');
+                hint.className = 'text-xs text-amber-600 mt-1 flex items-center gap-1';
+                hint.innerHTML = `${ALERT_ICON}<span>${message}</span>`;
+            } else {
+                hint.className = 'text-[11px] text-gray-500 mt-1';
+                hint.innerHTML = '';
+            }
+        }
+
+        function validateField(key) {
+            const input = document.getElementById(`input-${key}`);
+            if (!input) return;
+
+            // Hard error: browser couldn't parse the typed/pasted text as a number
+            if (input.validity.badInput) {
+                setFieldState(key, 'error', 'Please enter a valid number');
+                return;
+            }
+
+            const rule = RANGE_RULES[key];
+            if (rule) {
+                const val = parseFloat(input.value);
+                const outOfRange = input.value !== '' && !isNaN(val) && (val < rule.min || val > rule.max);
+                if (outOfRange) {
+                    setFieldState(key, 'warn', `${rule.label} is outside the typical ${rule.min}–${rule.max} ${rule.unit} range`);
+                    return;
+                }
+            }
+
+            setFieldState(key, 'ok');
+        }
+
+        function validateAllFields() {
+            FIELD_KEYS.forEach(validateField);
+        }
+
         function calculateRenalFunction() {
+            validateAllFields();
+
             const age = parseFloat(document.getElementById('input-age').value);
             const weight = parseFloat(document.getElementById('input-weight').value);
             const scr = parseFloat(document.getElementById('input-scr').value);
@@ -850,16 +1152,22 @@
                 calculatedEGFR = null;
                 document.getElementById('val-crcl').innerText = '--';
                 document.getElementById('val-egfr').innerText = '--';
-                
+
                 const stageEl = document.getElementById('val-ckd-stage');
                 stageEl.innerText = 'Stage --';
-                stageEl.className = 'text-xs font-bold text-gray-400 mt-1 ml-5';
-                
+                stageEl.className = 'text-xs font-bold text-gray-500 mt-1 ml-5';
+
                 updateColorIndicator('dot-crcl', null);
                 updateColorIndicator('dot-egfr', null);
-                
+
                 searchInput.disabled = true;
-                searchInput.placeholder = "Type Generic or Trade Name...";
+                searchInput.placeholder = "Search";
+
+                clearTimeout(gridSkeletonTimer);
+                document.getElementById('drug-grid-skeleton').classList.add('hidden');
+                renderDrugGrid();
+                closeDrugModal();
+                if (quickCheckDrugKey) renderQuickCheckResult(quickCheckDrugKey);
                 return;
             }
 
@@ -872,14 +1180,16 @@
             const scr_k = scr / k;
             const min_term = Math.min(scr_k, 1);
             const max_term = Math.max(scr_k, 1);
-            
+
             let egfr = 142 * Math.pow(min_term, a) * Math.pow(max_term, -1.200) * Math.pow(0.9938, age);
             if (patientGender === 'female') egfr *= 1.012;
             calculatedEGFR = egfr.toFixed(1);
 
             document.getElementById('val-crcl').innerText = calculatedCrCl;
             document.getElementById('val-egfr').innerText = calculatedEGFR;
-            
+            pulseValue('val-crcl');
+            pulseValue('val-egfr');
+
             // CKD Stage Evaluation
             let stage = "";
             let stageColor = "";
@@ -899,40 +1209,385 @@
             updateColorIndicator('dot-egfr', calculatedEGFR);
 
             searchInput.disabled = false;
-            searchInput.placeholder = "ค้นหายา... (เช่น Amoxicillin, Enalapril)";
-            
-            // Re-evaluate current drug if card is active
-            if (!document.getElementById('dosing-content').classList.contains('hidden')) {
-                const activeDrugName = document.getElementById('rec-drug-name').innerText;
-                const matchedEntry = Object.entries(drugDatabase).find(([k, v]) => v.name === activeDrugName);
-                if(matchedEntry) selectDrug(matchedEntry[0]);
+            searchInput.placeholder = "Search";
+
+            // Auto-calculate: briefly show a spinner + skeleton while the grid re-groups
+            showCalcSpinner();
+            showGridSkeleton();
+            clearTimeout(gridSkeletonTimer);
+            gridSkeletonTimer = setTimeout(() => {
+                renderDrugGrid();
+                hideGridSkeleton();
+                hideCalcSpinner();
+            }, 350);
+
+            // Refresh the open modal (if any) with the new values
+            if (currentModalDrugKey) {
+                populateModal(currentModalDrugKey);
             }
+            if (quickCheckDrugKey) {
+                renderQuickCheckResult(quickCheckDrugKey);
+            }
+        }
+
+        function pulseValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('pulse');
+            void el.offsetWidth; // restart animation
+            el.classList.add('pulse');
+        }
+
+        function getStatusDotColor(value) {
+            if (value === null || value === undefined || isNaN(value)) return 'bg-gray-300';
+            if (value >= 60) return 'bg-green-500';
+            if (value >= 30) return 'bg-yellow-400';
+            if (value >= 15) return 'bg-orange-500';
+            return 'bg-red-500';
         }
 
         function updateColorIndicator(elementId, value) {
             const el = document.getElementById(elementId);
-            el.className = 'w-2.5 h-2.5 rounded-full mr-3 inline-block'; 
-            if (value === null) el.classList.add(elementId === 'dot-crcl' ? 'bg-gray-500' : 'bg-gray-400');
-            else if (value >= 60) el.classList.add('bg-green-500');
-            else if (value >= 30) el.classList.add('bg-yellow-400');
-            else if (value >= 15) el.classList.add('bg-orange-500');
-            else el.classList.add('bg-red-500');
+            if (!el) return;
+            // Only swap the color utility, preserve the element's own size/layout classes
+            el.className = el.className.replace(/\bbg-\S+/g, '').trim();
+            el.classList.add(getStatusDotColor(value === null ? null : parseFloat(value)));
         }
 
-        // --- Search System ---
-        function filterCategory(cat) {
-            const searchInput = document.getElementById('drug-search');
-            searchInput.value = cat;
-            triggerSearch(cat);
+        // --- Drug Grid Dashboard (risk-grouped) ---
+        const RISK_GROUPS = [
+            { status: 'danger', title: 'Contraindicated', icon: '🛑', accent: 'red' },
+            { status: 'warning', title: 'Dose Adjustment Required', icon: '⚠️', accent: 'yellow' },
+            { status: 'normal', title: 'Safe / Normal Dosing', icon: '✅', accent: 'green' }
+        ];
+
+        function evaluateDrugStatus(drug) {
+            const valToUse = drug.param === 'eGFR' ? parseFloat(calculatedEGFR) : parseFloat(calculatedCrCl);
+            const matchedRule = drug.rules.find(r => valToUse >= r.min && valToUse <= r.max);
+            return { valToUse, matchedRule };
         }
 
-        function triggerSearch(term) {
-            term = term.toLowerCase();
-            const searchDropdown = document.getElementById('search-dropdown');
-            searchDropdown.innerHTML = '';
-            
+        function showGridSkeleton() {
+            document.getElementById('grid-empty-state').classList.add('hidden');
+            document.getElementById('drug-grid-sections').classList.add('hidden');
+            document.getElementById('drug-grid-skeleton').classList.remove('hidden');
+        }
+
+        function hideGridSkeleton() {
+            document.getElementById('drug-grid-skeleton').classList.add('hidden');
+            document.getElementById('drug-grid-sections').classList.remove('hidden');
+        }
+
+        function showCalcSpinner() {
+            document.getElementById('renal-spinner').classList.remove('hidden');
+        }
+
+        function hideCalcSpinner() {
+            document.getElementById('renal-spinner').classList.add('hidden');
+        }
+
+        function drugMatchesFilters(drug) {
+            if (activeCategory && !drug.category.toLowerCase().includes(activeCategory.toLowerCase())) return false;
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                if (!drug.name.toLowerCase().includes(term) && !drug.category.toLowerCase().includes(term)) return false;
+            }
+            return true;
+        }
+
+        function renderDrugGrid() {
+            const wrap = document.getElementById('drug-grid-sections');
+            const emptyState = document.getElementById('grid-empty-state');
+            const noResults = document.getElementById('grid-no-results');
+            const countBadge = document.getElementById('dashboard-drug-count');
+
+            if (!calculatedCrCl || !calculatedEGFR) {
+                wrap.innerHTML = '';
+                wrap.classList.add('hidden');
+                noResults.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                countBadge.innerText = '-- drugs';
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            const buckets = { danger: [], warning: [], normal: [] };
+            Object.entries(drugDatabase).forEach(([key, drug]) => {
+                if (!drugMatchesFilters(drug)) return;
+                const { valToUse, matchedRule } = evaluateDrugStatus(drug);
+                if (!matchedRule) return;
+                buckets[matchedRule.status].push({ key, drug, valToUse, matchedRule });
+            });
+
+            Object.values(buckets).forEach(list =>
+                list.sort((a, b) => a.drug.category.localeCompare(b.drug.category) || a.drug.name.localeCompare(b.drug.name))
+            );
+
+            const total = buckets.danger.length + buckets.warning.length + buckets.normal.length;
+            countBadge.innerText = `${total} drugs`;
+
+            if (total === 0) {
+                wrap.innerHTML = '';
+                wrap.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                noResults.classList.add('flex');
+                return;
+            }
+            noResults.classList.add('hidden');
+            noResults.classList.remove('flex');
+            wrap.classList.remove('hidden');
+
+            wrap.innerHTML = '';
+            RISK_GROUPS.forEach(group => {
+                const items = buckets[group.status];
+                if (items.length === 0) return;
+
+                const accentTextMap = { red: 'text-red-600', yellow: 'text-yellow-700', green: 'text-green-700' };
+
+                const section = document.createElement('section');
+                section.className = 'mb-8 last:mb-0';
+                section.innerHTML = `
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-lg">${group.icon}</span>
+                        <h3 class="text-lg font-bold ${accentTextMap[group.accent]}">${group.title}</h3>
+                        <span class="text-xs font-medium text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">${items.length}</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+                `;
+                const gridEl = section.querySelector('.grid');
+                items.forEach(item => gridEl.appendChild(buildDrugCard(item, group)));
+                wrap.appendChild(section);
+            });
+        }
+
+        function buildDrugCard({ key, drug, matchedRule }, group) {
+            const borderAccentMap = { red: 'border-l-red-400', yellow: 'border-l-yellow-400', green: 'border-l-green-400' };
+
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.onclick = () => openDrugModal(key);
+            card.className = `drug-card text-left w-full bg-white border border-gray-200 border-l-4 ${borderAccentMap[group.accent]} rounded-lg p-4 flex flex-col gap-2 cursor-pointer`;
+            card.innerHTML = `
+                <div class="text-lg font-bold text-gray-900 underline decoration-1 underline-offset-2 decoration-gray-300 leading-snug">${drug.name}</div>
+                <div class="text-sm text-gray-600">${drug.category}</div>
+                <div class="text-sm font-bold text-gray-900 mt-1">Recommended Dose</div>
+                <div class="text-sm text-gray-700">${matchedRule.dose}</div>
+            `;
+            return card;
+        }
+
+        // --- Drug Details Modal ---
+        function openDrugModal(drugId) {
+            if (!calculatedCrCl || !calculatedEGFR) return;
+            const drug = drugDatabase[drugId];
+            if (!drug) return;
+
+            currentModalDrugKey = drugId;
+            populateModal(drugId);
+            selectQuickCheckDrug(drugId, { openModal: false });
+
+            const backdrop = document.getElementById('drug-modal-backdrop');
+            const panel = document.getElementById('drug-modal-panel');
+            backdrop.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+
+            requestAnimationFrame(() => {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+                panel.classList.remove('opacity-0', 'scale-95');
+                panel.classList.add('opacity-100', 'scale-100');
+            });
+        }
+
+        function closeDrugModal() {
+            const backdrop = document.getElementById('drug-modal-backdrop');
+            if (backdrop.classList.contains('hidden')) return;
+            const panel = document.getElementById('drug-modal-panel');
+
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            panel.classList.remove('opacity-100', 'scale-100');
+            panel.classList.add('opacity-0', 'scale-95');
+            document.body.classList.remove('overflow-hidden');
+            currentModalDrugKey = null;
+
+            setTimeout(() => backdrop.classList.add('hidden'), 200);
+        }
+
+        function populateModal(drugId) {
+            const drug = drugDatabase[drugId];
+            if (!drug) return;
+            const { valToUse, matchedRule } = evaluateDrugStatus(drug);
+
+            document.getElementById('modal-drug-name').innerText = drug.name;
+            document.getElementById('modal-drug-cat').innerText = drug.category;
+            document.getElementById('modal-param-name').innerText = drug.param;
+            document.getElementById('modal-param-val').innerText = `${valToUse}${drug.param === 'eGFR' ? '' : ' ml/min'}`;
+            updateColorIndicator('modal-param-dot', valToUse);
+
+            const dangerBanner = document.getElementById('modal-danger-banner');
+            if (matchedRule && matchedRule.status === 'danger') {
+                dangerBanner.classList.remove('hidden');
+                document.getElementById('modal-danger-text').innerText = matchedRule.title;
+            } else {
+                dangerBanner.classList.add('hidden');
+            }
+
+            document.getElementById('modal-dose').innerText = matchedRule ? matchedRule.dose : '--';
+            document.getElementById('modal-note').innerText = matchedRule ? matchedRule.note : '--';
+
+            const listEl = document.getElementById('modal-guideline-list');
+            listEl.innerHTML = '';
+            drug.guidelines.forEach(g => {
+                const li = document.createElement('li');
+                li.className = "flex items-start before:content-['•'] before:mr-2 before:font-bold before:text-gray-400";
+                li.innerText = g;
+                listEl.appendChild(li);
+            });
+
+            document.getElementById('modal-reference').innerText = drug.reference;
+        }
+
+        // --- Dosing Recommendation: quick single-drug check (sidebar) ---
+        function getStandardRule(drug) {
+            return drug.rules.find(r => r.status === 'normal') || drug.rules[0];
+        }
+
+        // Best-effort heuristics for the Reduction/Interval badge: these read the
+        // existing dose text, they don't replace it — the full original dose string
+        // is always shown alongside the badge.
+        function extractFrequencyPerDay(text) {
+            let m = text.match(/ทุก\s*(\d+(?:\.\d+)?)\s*ชั่วโมง/) || text.match(/q\s*(\d+)\s*h/i);
+            if (m) {
+                const hours = parseFloat(m[1]);
+                return hours > 0 ? 24 / hours : null;
+            }
+            m = text.match(/วันละ\s*(\d+(?:\.\d+)?)\s*ครั้ง/);
+            if (m) return parseFloat(m[1]);
+            if (/once daily|\bOD\b/i.test(text)) return 1;
+            if (/วันเว้นวัน|ทุก\s*2\s*วัน|q\s*48\s*h/i.test(text)) return 0.5;
+            return null;
+        }
+
+        function extractLeadingDoseMg(text) {
+            const m = text.match(/(\d+(?:\.\d+)?)\s*(mcg|mg|g)\b/i);
+            if (!m) return null;
+            const num = parseFloat(m[1]);
+            const unit = m[2].toLowerCase();
+            if (unit === 'g') return num * 1000;
+            if (unit === 'mcg') return num / 1000;
+            return num;
+        }
+
+        function classifyAdjustment(standardRule, matchedRule) {
+            if (!matchedRule) return null;
+            if (matchedRule === standardRule) return { type: 'none', label: 'No Adjustment Needed', badgeClass: 'bg-green-50 text-green-700' };
+            if (matchedRule.status === 'danger') return { type: 'contraindicated', label: 'Contraindicated', badgeClass: 'bg-red-50 text-red-700' };
+
+            const stdFreq = extractFrequencyPerDay(`${standardRule.dose} ${standardRule.note}`);
+            const adjFreq = extractFrequencyPerDay(`${matchedRule.dose} ${matchedRule.note}`);
+            const intervalExtended = !!(stdFreq && adjFreq && adjFreq < stdFreq);
+
+            const stdMg = extractLeadingDoseMg(standardRule.dose);
+            const adjMg = extractLeadingDoseMg(matchedRule.dose);
+            const doseReduced = stdMg !== null && adjMg !== null && adjMg < stdMg;
+
+            if (intervalExtended && doseReduced) return { type: 'both', label: 'Dose Reduced + Interval Extended', badgeClass: 'bg-purple-50 text-purple-700' };
+            if (intervalExtended) return { type: 'interval', label: 'Interval Extension', badgeClass: 'bg-blue-50 text-blue-700' };
+            if (doseReduced) return { type: 'reduction', label: 'Dose Reduction', badgeClass: 'bg-indigo-50 text-indigo-700' };
+            return { type: 'adjusted', label: 'Renal Dose Adjustment', badgeClass: 'bg-gray-100 text-gray-700' };
+        }
+
+        function selectQuickCheckDrug(drugId, opts) {
+            const drug = drugDatabase[drugId];
+            if (!drug) return;
+            quickCheckDrugKey = drugId;
+
+            const searchInput = document.getElementById('qc-search');
+            searchInput.value = drug.name;
+            document.getElementById('qc-dropdown').classList.add('hidden');
+            document.getElementById('qc-clear').classList.remove('hidden');
+
+            renderQuickCheckResult(drugId);
+
+            if (opts && opts.openModal && calculatedCrCl && calculatedEGFR) {
+                openDrugModal(drugId);
+            }
+        }
+
+        function renderQuickCheckResult(drugId) {
+            const drug = drugDatabase[drugId];
+            if (!drug) return;
+
+            document.getElementById('qc-empty').classList.add('hidden');
+            document.getElementById('qc-result').classList.remove('hidden');
+            document.getElementById('qc-drug-name').innerText = drug.name;
+            document.getElementById('qc-drug-cat').innerText = drug.category;
+            document.getElementById('qc-param-name').innerText = drug.param;
+            document.getElementById('qc-param-method').innerText = drug.param === 'eGFR' ? 'CKD-EPI' : 'Cockcroft-Gault';
+
+            const doseBlock = document.getElementById('qc-dose-block');
+            const needCalc = document.getElementById('qc-need-calc');
+
+            if (!calculatedCrCl || !calculatedEGFR) {
+                document.getElementById('qc-param-val').innerText = '--';
+                updateColorIndicator('qc-param-dot', null);
+                doseBlock.classList.add('hidden');
+                needCalc.classList.remove('hidden');
+                return;
+            }
+            needCalc.classList.add('hidden');
+            doseBlock.classList.remove('hidden');
+
+            const { valToUse, matchedRule } = evaluateDrugStatus(drug);
+            document.getElementById('qc-param-val').innerText = `${valToUse}${drug.param === 'eGFR' ? '' : ' ml/min'}`;
+            updateColorIndicator('qc-param-dot', valToUse);
+
+            const dangerBanner = document.getElementById('qc-danger-banner');
+            if (matchedRule && matchedRule.status === 'danger') {
+                dangerBanner.classList.remove('hidden');
+                document.getElementById('qc-danger-text').innerText = matchedRule.title;
+            } else {
+                dangerBanner.classList.add('hidden');
+            }
+
+            const standardRule = getStandardRule(drug);
+            document.getElementById('qc-standard-dose').innerText = standardRule ? standardRule.dose : '--';
+            document.getElementById('qc-adjusted-dose').innerText = matchedRule ? matchedRule.dose : '--';
+            document.getElementById('qc-note').innerText = matchedRule ? matchedRule.note : '';
+
+            // Skip the "standard -> adjusted" arrow when there's nothing to contrast
+            document.getElementById('qc-arrow-row').classList.toggle('hidden', matchedRule === standardRule);
+
+            const badge = document.getElementById('qc-badge');
+            const classification = classifyAdjustment(standardRule, matchedRule);
+            if (classification) {
+                badge.innerText = classification.label;
+                badge.className = `inline-block text-xs font-semibold px-2.5 py-1 rounded-full mt-2 ${classification.badgeClass}`;
+            }
+
+            document.getElementById('qc-reference').innerText = drug.reference;
+        }
+
+        function clearQuickCheck() {
+            quickCheckDrugKey = null;
+            const searchInput = document.getElementById('qc-search');
+            searchInput.value = '';
+            document.getElementById('qc-clear').classList.add('hidden');
+            document.getElementById('qc-dropdown').classList.add('hidden');
+            document.getElementById('qc-result').classList.add('hidden');
+            document.getElementById('qc-empty').classList.remove('hidden');
+            searchInput.focus();
+        }
+
+        function renderQuickCheckDropdown(term) {
+            const dropdown = document.getElementById('qc-dropdown');
+            term = term.trim().toLowerCase();
+
             if (term.length < 1) {
-                searchDropdown.classList.add('hidden');
+                dropdown.classList.add('hidden');
+                dropdown.innerHTML = '';
                 return;
             }
 
@@ -940,144 +1595,84 @@
                 drug.name.toLowerCase().includes(term) || drug.category.toLowerCase().includes(term)
             );
 
-            if (matches.length > 0) {
-                searchDropdown.classList.remove('hidden');
-                matches.forEach(([key, drug]) => {
-                    const div = document.createElement('div');
-                    div.className = 'px-5 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors';
-                    div.innerHTML = `<div class="font-medium text-gray-800">${drug.name}</div><div class="text-xs text-gray-500">${drug.category}</div>`;
-                    div.onclick = () => {
-                        selectDrug(key);
-                        document.getElementById('drug-search').value = drug.name;
-                        searchDropdown.classList.add('hidden');
-                    };
-                    searchDropdown.appendChild(div);
-                });
+            dropdown.innerHTML = '';
+            if (matches.length === 0) {
+                dropdown.innerHTML = `<div class="px-4 py-3 text-sm text-gray-500 text-center">No drugs found</div>`;
             } else {
-                searchDropdown.classList.remove('hidden');
-                searchDropdown.innerHTML = `<div class="px-5 py-3 text-sm text-gray-500 text-center">ไม่พบข้อมูลยา</div>`;
+                matches.forEach(([key, drug]) => {
+                    const item = document.createElement('div');
+                    item.className = 'px-4 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors';
+                    item.innerHTML = `<div class="text-sm font-medium text-gray-800">${drug.name}</div><div class="text-xs text-gray-500">${drug.category}</div>`;
+                    item.onclick = () => selectQuickCheckDrug(key);
+                    dropdown.appendChild(item);
+                });
+            }
+            dropdown.classList.remove('hidden');
+        }
+
+        // --- Search & Category Filtering (drives the single merged grid) ---
+        function setPillActive(btn, isActive) {
+            if (isActive) {
+                btn.classList.remove('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
+                btn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+                btn.classList.remove('liquid-pop');
+                void btn.offsetWidth; // restart animation
+                btn.classList.add('liquid-pop');
+            } else {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm', 'liquid-pop');
+                btn.classList.add('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
             }
         }
 
-        function renderAllDrugsList() {
-            const listEl = document.getElementById('all-drugs-list');
-            const countEl = document.getElementById('drug-count');
-            listEl.innerHTML = '';
-            
-            // Sort drugs alphabetically by name
-            const sortedDrugs = Object.entries(drugDatabase).sort((a, b) => 
-                a[1].name.localeCompare(b[1].name)
-            );
+        function filterCategory(cat, btnEl) {
+            const buttons = document.querySelectorAll('.cat-pill');
 
-            if(countEl) countEl.innerText = `${sortedDrugs.length} items`;
+            if (activeCategory === cat) {
+                activeCategory = null;
+                buttons.forEach(b => setPillActive(b, false));
+            } else {
+                activeCategory = cat;
+                buttons.forEach(b => setPillActive(b, b === btnEl));
+            }
+            renderDrugGrid();
+        }
 
-            sortedDrugs.forEach(([key, drug]) => {
-                const btn = document.createElement('button');
-                btn.onclick = () => selectDrug(key);
-                btn.className = "w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 hover:border-gray-200 transition-all group shadow-sm";
-                btn.innerHTML = `
-                    <div class="flex flex-col items-start text-left">
-                        <span class="text-sm font-medium text-gray-700">${drug.name}</span>
-                        <span class="text-xs text-gray-400 mt-0.5">${drug.category}</span>
-                    </div>
-                    <span class="text-gray-300 group-hover:text-gray-500 transition-transform group-hover:translate-x-1">→</span>
-                `;
-                listEl.appendChild(btn);
-            });
+        function handleSearchInput(term) {
+            searchTerm = term.trim();
+            renderDrugGrid();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderAllDrugsList(); // Render full list on load
+            renderDrugGrid(); // Show empty state until renal function is calculated
 
             // Add Auto-compute listeners
             document.getElementById('input-age').addEventListener('input', calculateRenalFunction);
             document.getElementById('input-weight').addEventListener('input', calculateRenalFunction);
             document.getElementById('input-scr').addEventListener('input', calculateRenalFunction);
-            
-            const searchInput = document.getElementById('drug-search');
-            searchInput.addEventListener('input', (e) => triggerSearch(e.target.value));
-            
-            // Close dropdown when clicking outside
+
+            // Sanity-range validation also re-checks on blur (e.g. after paste/autofill)
+            document.getElementById('input-weight').addEventListener('blur', () => validateField('weight'));
+            document.getElementById('input-scr').addEventListener('blur', () => validateField('scr'));
+
+            document.getElementById('drug-search').addEventListener('input', (e) => handleSearchInput(e.target.value));
+
+            // Quick single-drug check (sidebar): search + dropdown
+            const qcSearch = document.getElementById('qc-search');
+            qcSearch.addEventListener('input', (e) => {
+                if (e.target.value.trim() === '') document.getElementById('qc-clear').classList.add('hidden');
+                renderQuickCheckDropdown(e.target.value);
+            });
             document.addEventListener('click', (e) => {
-                const searchDropdown = document.getElementById('search-dropdown');
-                if(!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
-                    searchDropdown.classList.add('hidden');
+                if (!qcSearch.closest('.relative').contains(e.target)) {
+                    document.getElementById('qc-dropdown').classList.add('hidden');
                 }
+            });
+
+            // Modal dismissal via ESC key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeDrugModal();
             });
         });
-
-        function selectDrug(drugId) {
-            if (!calculatedCrCl || !calculatedEGFR) {
-                alert("Please calculate renal function first.");
-                return;
-            }
-
-            const drug = drugDatabase[drugId];
-            if (!drug) return;
-
-            document.getElementById('dosing-empty-state').classList.add('hidden');
-            document.getElementById('dosing-content').classList.remove('hidden');
-
-            document.getElementById('rec-drug-name').innerText = drug.name;
-            document.getElementById('rec-drug-cat').innerText = drug.category;
-            
-            const valToUse = drug.param === 'eGFR' ? parseFloat(calculatedEGFR) : parseFloat(calculatedCrCl);
-            document.getElementById('rec-param-name').innerText = drug.param;
-            document.getElementById('rec-param-val').innerText = valToUse;
-
-            const matchedRule = drug.rules.find(r => valToUse >= r.min && valToUse <= r.max);
-            
-            const container = document.getElementById('dosing-container');
-            const alertBox = document.getElementById('rec-alert-box');
-            
-            // รีเซ็ตคลาสสีพื้นหลัง
-            container.classList.remove('bg-empty-ref', 'bg-purple-ref', 'bg-red-ref', 'bg-green-ref');
-
-            if (matchedRule) {
-                document.getElementById('rec-status-title').innerText = matchedRule.title;
-                document.getElementById('rec-dose').innerText = matchedRule.dose;
-                document.getElementById('rec-note').innerText = matchedRule.note;
-                
-                // เปลี่ยนสี Background ของ Card หลักตามสไตล์ Reference (Vibrant colors)
-                if (matchedRule.status === 'normal') {
-                    container.classList.add('bg-green-ref');
-                    document.getElementById('rec-icon').innerText = '✅';
-                    alertBox.className = 'bg-white rounded-[24px] p-6 mb-8 shadow-sm';
-                } else if (matchedRule.status === 'warning') {
-                    container.classList.add('bg-purple-ref'); // ใช้สีม่วงเหมือนการ์ด Product planning ใน ref
-                    document.getElementById('rec-icon').innerText = '⚠️';
-                    alertBox.className = 'bg-white rounded-[24px] p-6 mb-8 shadow-sm';
-                } else {
-                    container.classList.add('bg-red-ref'); // ใช้สีแดงเหมือนการ์ด Roadmap ใน ref
-                    document.getElementById('rec-icon').innerText = '🛑';
-                    alertBox.className = 'bg-white/20 backdrop-blur-md text-white rounded-[24px] p-6 mb-8 border border-white/30 shadow-sm';
-                    // เปลี่ยนสีตัวอักษรในกล่องแดงให้เป็นสีขาว
-                    document.getElementById('rec-status-title').classList.replace('text-gray-900', 'text-white');
-                    document.getElementById('rec-dose').classList.replace('text-gray-800', 'text-white');
-                    document.getElementById('rec-note').classList.replace('text-gray-600', 'text-white');
-                }
-                
-                // รีเซ็ตสีตัวอักษรถ้าไม่ได้อยู่ในสถานะ danger (เพราะสถานะอื่นกล่องเป็นสีขาว)
-                if (matchedRule.status !== 'danger') {
-                     document.getElementById('rec-status-title').classList.replace('text-white', 'text-gray-900');
-                     document.getElementById('rec-dose').classList.replace('text-white', 'text-gray-800');
-                     document.getElementById('rec-note').classList.replace('text-white', 'text-gray-600');
-                }
-
-            }
-
-            document.getElementById('rec-guideline-title') ? document.getElementById('rec-guideline-title').innerText = `Full Guidelines:` : null;
-            const listEl = document.getElementById('rec-guideline-list');
-            listEl.innerHTML = '';
-            drug.guidelines.forEach(g => {
-                const li = document.createElement('li');
-                li.className = "flex items-start before:content-['•'] before:mr-2 before:font-bold";
-                li.innerText = g;
-                listEl.appendChild(li);
-            });
-
-            document.getElementById('rec-reference').innerText = drug.reference;
-        }
     </script>
 </body>
 </html>
