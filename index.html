@@ -225,8 +225,8 @@
 
     <div class="page-content max-w-[1600px] mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
 
-        <!-- ==================== Sidebar (Patient Inputs, sticky) ==================== -->
-        <aside class="w-full lg:w-[30%] lg:shrink-0 lg:sticky lg:top-8 lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto flex flex-col gap-6 lg:gap-8 pr-0.5">
+        <!-- ==================== Sidebar (Patient Inputs, sticky top-6) ==================== -->
+        <aside class="w-full lg:w-[340px] xl:w-[380px] lg:shrink-0 lg:sticky lg:top-6 self-start flex flex-col gap-6">
 
             <!-- 1. Input & Calculator Card -->
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -275,9 +275,9 @@
                     </div>
                 </div>
 
-                <!-- Reset: moved to the bottom as a subtle secondary action, away from the top-edge misclick zone on mobile -->
-                <div class="flex justify-center mt-2">
-                    <button type="button" onclick="resetCalculator()" class="text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 cursor-pointer transition-colors px-4 py-2.5 rounded-lg">
+                <!-- Reset: moved to the bottom as a subtle secondary action -->
+                <div class="flex justify-center mt-3">
+                    <button type="button" onclick="resetCalculator()" class="text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 cursor-pointer transition-colors px-4 py-2 rounded-lg">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
                         Reset
                     </button>
@@ -286,7 +286,7 @@
 
             <!-- 2. Renal Function Card -->
             <div class="bento-card">
-                <div class="flex items-center justify-between gap-2 mb-6">
+                <div class="flex items-center justify-between gap-2 mb-5">
                     <div class="flex items-center gap-2">
                         <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">Renal Function</h2>
                         <svg id="renal-spinner" class="hidden w-4 h-4 text-indigo-500 animate-spin" viewBox="0 0 24 24" fill="none" aria-label="Recalculating">
@@ -331,78 +331,6 @@
                 </div>
             </div>
 
-            <!-- 3. Dosing Recommendation (quick single-drug check) -->
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <h2 class="text-2xl font-semibold text-gray-900 tracking-tight mb-4">Dosing Recommendation</h2>
-
-                <!-- Drug search -->
-                <div class="relative">
-                    <svg class="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" id="qc-search" class="soft-input w-full pl-10 pr-9 py-2.5 text-sm rounded-full" placeholder="Search a drug, e.g. Meropenem...">
-                    <button id="qc-clear" type="button" onclick="clearQuickCheck()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" aria-label="Clear selection">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                    <div id="qc-dropdown" class="hidden absolute z-40 w-full bg-white mt-2 rounded-2xl shadow-xl border border-gray-100 max-h-56 overflow-y-auto"></div>
-                </div>
-
-                <p id="qc-empty" class="text-[13px] text-gray-500 mt-3">Search and select a drug to see its renal-adjusted dose.</p>
-
-                <!-- Selected drug -->
-                <div id="qc-result" class="hidden mt-4">
-                    <div class="flex items-start justify-between gap-2">
-                        <div>
-                            <div id="qc-drug-name" class="text-lg font-bold text-gray-900 leading-snug">--</div>
-                            <div id="qc-drug-cat" class="text-sm text-gray-600">--</div>
-                        </div>
-                        <button id="btn-copy-qc" type="button" onclick="copyQuickCheckResult()" class="text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 active:scale-95 px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all cursor-pointer shrink-0" title="Copy dosing recommendation" aria-label="Copy dosing recommendation">
-                            <svg class="w-3.5 h-3.5 copy-icon shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                            <span class="copy-label">Copy</span>
-                        </button>
-                    </div>
-
-                    <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100">
-                        <span id="qc-param-dot" class="w-2 h-2 rounded-full bg-gray-300 shrink-0"></span>
-                        <span class="text-xs font-semibold text-gray-700">Based on <span id="qc-param-name">CrCl</span> (<span id="qc-param-method">Cockcroft-Gault</span>): <span id="qc-param-val">--</span></span>
-                    </div>
-
-                    <!-- Prompt while patient inputs are incomplete -->
-                    <p id="qc-need-calc" class="hidden text-[13px] text-gray-500 mt-4">Enter Age, Weight and SCr above to calculate the renal-adjusted dose.</p>
-
-                    <!-- Dose comparison -->
-                    <div id="qc-dose-block" class="hidden">
-                        <div id="qc-danger-banner" class="hidden mt-4 bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 flex items-start gap-2 text-sm">
-                            <span class="shrink-0">🛑</span>
-                            <span id="qc-danger-text"></span>
-                        </div>
-
-                        <div class="mt-4">
-                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Standard Dose</div>
-                            <div id="qc-standard-dose" class="text-sm text-gray-500 mt-0.5">--</div>
-                        </div>
-
-                        <div id="qc-arrow-row" class="flex justify-center py-1">
-                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-                        </div>
-
-                        <div>
-                            <div class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Renal Adjusted Dose</div>
-                            <div id="qc-adjusted-dose" class="text-2xl font-extrabold text-indigo-700 leading-tight mt-0.5">--</div>
-                            <span id="qc-badge" class="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mt-2">--</span>
-                        </div>
-
-                        <p id="qc-note" class="text-sm text-gray-600 mt-3"></p>
-
-                        <div class="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-gray-100">
-                            <p class="text-[11px] text-gray-500">Source: <span id="qc-reference">--</span></p>
-                            <button type="button" onclick="openDrugModal(quickCheckDrugKey)" class="shrink-0 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">Full guidelines →</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </aside>
 
         <!-- ==================== Main content (Search + Dosing Recommendations) ==================== -->
@@ -410,29 +338,35 @@
 
             <!-- 3. Medications (Search + Dosing Recommendations merged) -->
             <div class="bento-card relative">
-                <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                     <div>
                         <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">Dosing Recommendations</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">รายการยาและคำแนะนำการปรับขนาดยาตามการทำงานของไต</p>
                         <span id="dashboard-drug-count" class="inline-block mt-2 bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full font-medium">-- drugs</span>
                     </div>
 
-                    <!-- Search (top right) -->
-                    <div class="relative w-full sm:w-64">
-                        <input type="text" id="drug-search" disabled class="soft-input w-full pl-10 pr-4 py-2.5 text-sm disabled:opacity-50 disabled:bg-gray-100 rounded-full" placeholder="Search">
-                        <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <!-- Unified Primary Search Bar -->
+                    <div class="relative w-full sm:w-80">
+                        <input type="text" id="drug-search" disabled class="soft-input w-full pl-10 pr-9 py-2.5 text-sm disabled:opacity-50 disabled:bg-gray-100 rounded-full border border-gray-200 focus:bg-white focus:border-indigo-500 transition-all shadow-sm" placeholder="ค้นหาชื่อยา หรือกลุ่มยา (เช่น Metformin, NSAID)...">
+                        <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <button id="drug-search-clear" type="button" onclick="clearDrugSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1" aria-label="Clear search">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
                     </div>
                 </div>
 
                 <!-- Categories -->
-                <div class="flex flex-wrap gap-2 mb-6">
-                    <button data-category="Antidiabetic" onclick="filterCategory('Antidiabetic', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Antidiabetics</button>
-                    <button data-category="Antibiotic" onclick="filterCategory('Antibiotic', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Antibiotics</button>
-                    <button data-category="Cardiovascular" onclick="filterCategory('Cardiovascular', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Cardiovascular</button>
-                    <button data-category="Analgesic" onclick="filterCategory('Analgesic', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Analgesics</button>
-                    <button data-category="H2 Blocker" onclick="filterCategory('H2 Blocker', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">H2 Blockers</button>
-                    <button data-category="Quinolone" onclick="filterCategory('Quinolone', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Quinolones</button>
-                    <button data-category="Cephalosporin" onclick="filterCategory('Cephalosporin', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Cephalosporins</button>
-                    <button data-category="Aminoglycoside" onclick="filterCategory('Aminoglycoside', this)" class="cat-pill bg-gray-100 text-gray-600 text-xs font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition">Aminoglycosides</button>
+                <div class="flex flex-wrap items-center gap-2 mb-6" id="category-chips-container">
+                    <button type="button" data-category="" onclick="filterCategory('', this)" class="cat-pill active text-xs font-semibold px-4 py-2 rounded-full transition-all cursor-pointer bg-indigo-600 text-white ring-2 ring-indigo-600 ring-offset-2 shadow-sm">ทั้งหมด (All)</button>
+                    <button type="button" data-category="Antidiabetic" onclick="filterCategory('Antidiabetic', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Antidiabetics</button>
+                    <button type="button" data-category="Antibiotic" onclick="filterCategory('Antibiotic', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Antibiotics</button>
+                    <button type="button" data-category="Cardiovascular" onclick="filterCategory('Cardiovascular', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Cardiovascular</button>
+                    <button type="button" data-category="NSAID" onclick="filterCategory('NSAID', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:border-amber-300">⚠️ NSAIDs</button>
+                    <button type="button" data-category="Analgesic" onclick="filterCategory('Analgesic', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Analgesics</button>
+                    <button type="button" data-category="H2 Blocker" onclick="filterCategory('H2 Blocker', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">H2 Blockers</button>
+                    <button type="button" data-category="Quinolone" onclick="filterCategory('Quinolone', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Quinolones</button>
+                    <button type="button" data-category="Cephalosporin" onclick="filterCategory('Cephalosporin', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Cephalosporins</button>
+                    <button type="button" data-category="Aminoglycoside" onclick="filterCategory('Aminoglycoside', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Aminoglycosides</button>
                 </div>
 
                 <!-- Empty State -->
@@ -1110,7 +1044,6 @@
         let searchTerm = '';
         let currentModalDrugKey = null;
         let gridSkeletonTimer = null;
-        let quickCheckDrugKey = null;
 
         function setGender(gender) {
             patientGender = gender;
@@ -1222,13 +1155,14 @@
                 }
 
                 searchInput.disabled = true;
-                searchInput.placeholder = "Search";
+                searchInput.placeholder = "คำนวณค่าไตก่อนเพื่อค้นหายา...";
+                const clearBtn = document.getElementById('drug-search-clear');
+                if (clearBtn) clearBtn.classList.add('hidden');
 
                 clearTimeout(gridSkeletonTimer);
                 document.getElementById('drug-grid-skeleton').classList.add('hidden');
                 renderDrugGrid();
                 closeDrugModal();
-                if (quickCheckDrugKey) renderQuickCheckResult(quickCheckDrugKey);
                 return;
             }
 
@@ -1277,7 +1211,7 @@
             }
 
             searchInput.disabled = false;
-            searchInput.placeholder = "Search";
+            searchInput.placeholder = "ค้นหาชื่อยา หรือกลุ่มยา (เช่น Metformin, NSAID)...";
 
             // Auto-calculate: briefly show a spinner + skeleton while the grid re-groups
             showCalcSpinner();
@@ -1292,9 +1226,6 @@
             // Refresh the open modal (if any) with the new values
             if (currentModalDrugKey) {
                 populateModal(currentModalDrugKey);
-            }
-            if (quickCheckDrugKey) {
-                renderQuickCheckResult(quickCheckDrugKey);
             }
         }
 
@@ -1326,7 +1257,7 @@
         const RISK_GROUPS = [
             { status: 'danger', title: 'Contraindicated', icon: '🛑', accent: 'red' },
             { status: 'warning', title: 'Dose Adjustment Required', icon: '⚠️', accent: 'yellow' },
-            { status: 'normal', title: 'Safe / Normal Dosing', icon: '✅', accent: 'green' }
+            { status: 'normal', title: 'Normal Dosing (No Adjustment Needed)', icon: '✅', accent: 'green' }
         ];
 
         function evaluateDrugStatus(drug) {
@@ -1355,12 +1286,68 @@
         }
 
         function drugMatchesFilters(drug) {
-            if (activeCategory && !drug.category.toLowerCase().includes(activeCategory.toLowerCase())) return false;
+            if (activeCategory) {
+                if (activeCategory === 'NSAID') {
+                    const isNSAID = drug.category.toLowerCase().includes('nsaid') || ['ibuprofen', 'piroxicam', 'diclofenac'].includes(drug.name.toLowerCase());
+                    if (!isNSAID) return false;
+                } else if (!drug.category.toLowerCase().includes(activeCategory.toLowerCase())) {
+                    return false;
+                }
+            }
             if (searchTerm) {
                 const term = searchTerm.toLowerCase();
-                if (!drug.name.toLowerCase().includes(term) && !drug.category.toLowerCase().includes(term)) return false;
+                const matchesName = drug.name.toLowerCase().includes(term);
+                const matchesCat = drug.category.toLowerCase().includes(term);
+                const matchesParam = drug.param.toLowerCase().includes(term);
+                const matchesGuideline = drug.guidelines && drug.guidelines.some(g => g.toLowerCase().includes(term));
+                if (!matchesName && !matchesCat && !matchesParam && !matchesGuideline) return false;
             }
             return true;
+        }
+
+        function parseDoseDetails(matchedRule, drug) {
+            if (!matchedRule) return { dose: '--', frequency: '--', maxDaily: '--' };
+
+            if (matchedRule.status === 'danger' && (
+                (matchedRule.title && matchedRule.title.toLowerCase().includes('contraindicated')) ||
+                (matchedRule.dose && (matchedRule.dose.includes('ห้ามใช้') || matchedRule.dose.includes('หลีกเลี่ยง') || matchedRule.dose.toLowerCase().includes('avoid') || matchedRule.dose.toLowerCase().includes('do not use')))
+            )) {
+                return {
+                    dose: matchedRule.dose || 'ห้ามใช้ (Contraindicated)',
+                    frequency: 'งดการใช้ยา (Avoid / Discontinue)',
+                    maxDaily: '0 mg / วัน'
+                };
+            }
+
+            const text = (matchedRule.dose || '').trim();
+            let doseVal = text;
+            let freqVal = 'วันละ 1 ครั้ง (Once daily)';
+            let maxVal = 'ตามขนาดยาที่ปรับ';
+
+            if (text.match(/q6h|ทุก\s*6\s*ชั่วโมง/i)) freqVal = 'ทุก 6 ชั่วโมง (q6h)';
+            else if (text.match(/q8h|ทุก\s*8\s*ชั่วโมง/i)) freqVal = 'ทุก 8 ชั่วโมง (q8h)';
+            else if (text.match(/q12h|ทุก\s*12\s*ชั่วโมง/i)) freqVal = 'ทุก 12 ชั่วโมง (q12h)';
+            else if (text.match(/q24h|ทุก\s*24\s*ชั่วโมง/i)) freqVal = 'ทุก 24 ชั่วโมง (q24h)';
+            else if (text.match(/q48h|ทุก\s*48\s*ชั่วโมง/i)) freqVal = 'ทุก 48 ชั่วโมง (q48h)';
+            else if (text.match(/ทุก\s*2-3\s*วัน/i)) freqVal = 'ทุก 2-3 วัน (q48-72h)';
+            else if (text.match(/วันละ\s*3\s*ครั้ง|tid/i)) freqVal = 'วันละ 3 ครั้ง (TID)';
+            else if (text.match(/วันละ\s*2\s*ครั้ง|bid/i)) freqVal = 'วันละ 2 ครั้ง (BID)';
+            else if (text.match(/วันละ\s*1\s*ครั้ง|once daily|qd/i)) freqVal = 'วันละ 1 ครั้ง (Once daily)';
+            else if (text.match(/ก่อนนอน|hs/i)) freqVal = 'วันละ 1 ครั้ง ก่อนนอน (HS)';
+
+            const maxMatch = text.match(/Max\s+([0-9,.-]+\s*(?:mg|g|mcg|มก\.)?(?:\s*\/\s*(?:day|วัน))?)/i);
+            if (maxMatch) {
+                let m = maxMatch[1].trim();
+                if (!m.includes('/') && !m.includes('day') && !m.includes('วัน')) m += ' / วัน';
+                maxVal = m.replace(/day/i, 'วัน');
+            } else {
+                const mgMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:mg|มก\.)/i);
+                if (mgMatch && (freqVal.includes('Once daily') || freqVal.includes('วันละ 1 ครั้ง'))) {
+                    maxVal = `${mgMatch[1]} mg / วัน`;
+                }
+            }
+
+            return { dose: doseVal, frequency: freqVal, maxDaily: maxVal };
         }
 
         function renderDrugGrid() {
@@ -1429,8 +1416,17 @@
             });
         }
 
-        function buildDrugCard({ key, drug, matchedRule }, group) {
-            const borderAccentMap = { red: 'border-l-red-400', yellow: 'border-l-yellow-400', green: 'border-l-green-400' };
+        function buildDrugCard({ key, drug, valToUse, matchedRule }, group) {
+            const borderAccentMap = {
+                red: 'border-l-red-500 bg-red-50/10 hover:border-red-600',
+                yellow: 'border-l-amber-400 bg-amber-50/10 hover:border-amber-500',
+                green: 'border-l-emerald-500 bg-emerald-50/10 hover:border-emerald-600'
+            };
+
+            const isNSAID = drug.category.toLowerCase().includes('nsaid') || ['ibuprofen', 'piroxicam', 'diclofenac'].includes(key);
+            const doseDetails = parseDoseDetails(matchedRule, drug);
+            const paramUnit = drug.param === 'eGFR' ? 'mL/min/1.73m²' : 'mL/min';
+            const paramMethod = drug.param === 'eGFR' ? 'CKD-EPI' : 'Cockcroft-Gault';
 
             const card = document.createElement('div');
             card.role = 'button';
@@ -1446,20 +1442,74 @@
                     openDrugModal(key);
                 }
             };
-            card.className = `drug-card group relative text-left w-full bg-white border border-gray-200 border-l-4 ${borderAccentMap[group.accent]} rounded-lg p-4 flex flex-col gap-2 cursor-pointer`;
+            card.className = `drug-card group relative text-left w-full bg-white border border-gray-200 border-l-4 ${borderAccentMap[group.accent]} rounded-2xl p-4 flex flex-col justify-between cursor-pointer hover:shadow-md transition-all`;
+
             card.innerHTML = `
-                <div class="flex items-start justify-between gap-2">
-                    <div class="text-lg font-bold text-gray-900 underline decoration-1 underline-offset-2 decoration-gray-300 leading-snug group-hover:text-indigo-600 transition-colors">${drug.name}</div>
-                    <button type="button" onclick="event.stopPropagation(); copyDrugRecommendation('${key}', this)" class="card-copy-btn text-gray-400 hover:text-indigo-600 hover:bg-gray-100 p-1.5 rounded-lg transition-all cursor-pointer" title="Copy recommendation" aria-label="Copy recommendation for ${drug.name}">
-                        <svg class="w-4 h-4 copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                    </button>
+                <div class="flex flex-col gap-2">
+                    <!-- Header: Drug Name & Copy Button -->
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <h4 class="text-base font-bold text-gray-900 leading-snug group-hover:text-indigo-600 transition-colors">${drug.name}</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">${drug.category}</p>
+                        </div>
+                        <button type="button" onclick="event.stopPropagation(); copyDrugRecommendation('${key}', this)" class="card-copy-btn text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 p-1.5 rounded-lg transition-all cursor-pointer shrink-0" title="Copy recommendation" aria-label="Copy recommendation for ${drug.name}">
+                            <svg class="w-4 h-4 copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Calculation Criteria Badge (เกณฑ์ CrCl หรือ eGFR) -->
+                    <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100/80">
+                            <svg class="w-3 h-3 text-indigo-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                            เกณฑ์: ${drug.param} (${paramMethod})
+                        </span>
+                        <span class="text-[11px] font-medium text-gray-600">
+                            = <span class="font-bold text-gray-900">${valToUse}</span> ${paramUnit}
+                        </span>
+                    </div>
+
+                    <!-- NSAID Caution Badge (ป้ายเตือนระวัง AKI) -->
+                    ${isNSAID ? `
+                    <div class="flex items-start gap-1.5 p-2.5 rounded-xl bg-amber-50 border border-amber-200/90 text-amber-900 text-xs font-medium leading-snug shadow-xs">
+                        <span class="text-sm shrink-0">⚠️</span>
+                        <span>ระวังความเสี่ยงไตวายเฉียบพลัน (AKI) หลีกเลี่ยงการใช้ต่อเนื่อง</span>
+                    </div>` : ''}
+
+                    <!-- Standardized Dose Block (3 บรรทัดมาตรฐาน) -->
+                    <div class="mt-1 bg-gray-50/90 rounded-xl p-3 border border-gray-100 text-xs space-y-1.5">
+                        <div class="flex items-baseline justify-between gap-2">
+                            <span class="text-gray-500 font-medium shrink-0">ขนาดยาที่แนะนำ:</span>
+                            <span class="text-gray-900 font-bold text-right leading-tight">${doseDetails.dose}</span>
+                        </div>
+                        <div class="flex items-baseline justify-between gap-2">
+                            <span class="text-gray-500 font-medium shrink-0">ความถี่:</span>
+                            <span class="text-gray-700 font-medium text-right">${doseDetails.frequency}</span>
+                        </div>
+                        <div class="flex items-baseline justify-between gap-2">
+                            <span class="text-gray-500 font-medium shrink-0">ขนาดยาสูงสุดต่อวัน:</span>
+                            <span class="text-gray-700 font-medium text-right">${doseDetails.maxDaily}</span>
+                        </div>
+                    </div>
+
+                    <!-- Clinical note if present -->
+                    ${matchedRule.note ? `
+                    <div class="text-[11px] text-gray-600 bg-white p-2 rounded-lg border border-gray-100 flex items-start gap-1.5 leading-snug">
+                        <span class="text-indigo-500 shrink-0 font-bold">💡</span>
+                        <span>${matchedRule.note}</span>
+                    </div>` : ''}
                 </div>
-                <div class="text-sm text-gray-600">${drug.category}</div>
-                <div class="text-sm font-bold text-gray-900 mt-1">Recommended Dose</div>
-                <div class="text-sm text-gray-700">${matchedRule.dose}</div>
+
+                <!-- Footer / Action Link -->
+                <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-gray-100 text-[11px] text-gray-400">
+                    <span>คลิกเพื่อดูเกณฑ์ละเอียด</span>
+                    <span class="text-indigo-600 font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                        ดูรายละเอียด
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </span>
+                </div>
             `;
             return card;
         }
@@ -1472,7 +1522,6 @@
 
             currentModalDrugKey = drugId;
             populateModal(drugId);
-            selectQuickCheckDrug(drugId, { openModal: false });
 
             const backdrop = document.getElementById('drug-modal-backdrop');
             const panel = document.getElementById('drug-modal-panel');
@@ -1521,6 +1570,22 @@
                 dangerBanner.classList.add('hidden');
             }
 
+            // NSAID Banner in Modal
+            let nsaidBanner = document.getElementById('modal-nsaid-banner');
+            const isNSAID = drug.category.toLowerCase().includes('nsaid') || ['ibuprofen', 'piroxicam', 'diclofenac'].includes(drugId);
+            if (isNSAID) {
+                if (!nsaidBanner) {
+                    nsaidBanner = document.createElement('div');
+                    nsaidBanner.id = 'modal-nsaid-banner';
+                    nsaidBanner.className = 'mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-center gap-2';
+                    nsaidBanner.innerHTML = '<span class="text-base">⚠️</span><span>ระวังความเสี่ยงไตวายเฉียบพลัน (AKI) หลีกเลี่ยงการใช้ต่อเนื่อง</span>';
+                    dangerBanner.parentNode.insertBefore(nsaidBanner, dangerBanner.nextSibling);
+                }
+                nsaidBanner.classList.remove('hidden');
+            } else if (nsaidBanner) {
+                nsaidBanner.classList.add('hidden');
+            }
+
             document.getElementById('modal-dose').innerText = matchedRule ? matchedRule.dose : '--';
             document.getElementById('modal-note').innerText = matchedRule ? matchedRule.note : '--';
 
@@ -1536,197 +1601,66 @@
             document.getElementById('modal-reference').innerText = drug.reference;
         }
 
-        // --- Dosing Recommendation: quick single-drug check (sidebar) ---
-        function getStandardRule(drug) {
-            return drug.rules.find(r => r.status === 'normal') || drug.rules[0];
-        }
-
-        // Best-effort heuristics for the Reduction/Interval badge: these read the
-        // existing dose text, they don't replace it — the full original dose string
-        // is always shown alongside the badge.
-        function extractFrequencyPerDay(text) {
-            let m = text.match(/ทุก\s*(\d+(?:\.\d+)?)\s*ชั่วโมง/) || text.match(/q\s*(\d+)\s*h/i);
-            if (m) {
-                const hours = parseFloat(m[1]);
-                return hours > 0 ? 24 / hours : null;
-            }
-            m = text.match(/วันละ\s*(\d+(?:\.\d+)?)\s*ครั้ง/);
-            if (m) return parseFloat(m[1]);
-            if (/once daily|\bOD\b/i.test(text)) return 1;
-            if (/วันเว้นวัน|ทุก\s*2\s*วัน|q\s*48\s*h/i.test(text)) return 0.5;
-            return null;
-        }
-
-        function extractLeadingDoseMg(text) {
-            const m = text.match(/(\d+(?:\.\d+)?)\s*(mcg|mg|g)\b/i);
-            if (!m) return null;
-            const num = parseFloat(m[1]);
-            const unit = m[2].toLowerCase();
-            if (unit === 'g') return num * 1000;
-            if (unit === 'mcg') return num / 1000;
-            return num;
-        }
-
-        function classifyAdjustment(standardRule, matchedRule) {
-            if (!matchedRule) return null;
-            if (matchedRule === standardRule) return { type: 'none', label: 'No Adjustment Needed', badgeClass: 'bg-green-50 text-green-700' };
-            if (matchedRule.status === 'danger') return { type: 'contraindicated', label: 'Contraindicated', badgeClass: 'bg-red-50 text-red-700' };
-
-            const stdFreq = extractFrequencyPerDay(`${standardRule.dose} ${standardRule.note}`);
-            const adjFreq = extractFrequencyPerDay(`${matchedRule.dose} ${matchedRule.note}`);
-            const intervalExtended = !!(stdFreq && adjFreq && adjFreq < stdFreq);
-
-            const stdMg = extractLeadingDoseMg(standardRule.dose);
-            const adjMg = extractLeadingDoseMg(matchedRule.dose);
-            const doseReduced = stdMg !== null && adjMg !== null && adjMg < stdMg;
-
-            if (intervalExtended && doseReduced) return { type: 'both', label: 'Dose Reduced + Interval Extended', badgeClass: 'bg-purple-50 text-purple-700' };
-            if (intervalExtended) return { type: 'interval', label: 'Interval Extension', badgeClass: 'bg-blue-50 text-blue-700' };
-            if (doseReduced) return { type: 'reduction', label: 'Dose Reduction', badgeClass: 'bg-indigo-50 text-indigo-700' };
-            return { type: 'adjusted', label: 'Renal Dose Adjustment', badgeClass: 'bg-gray-100 text-gray-700' };
-        }
-
-        function selectQuickCheckDrug(drugId, opts) {
-            const drug = drugDatabase[drugId];
-            if (!drug) return;
-            quickCheckDrugKey = drugId;
-
-            const searchInput = document.getElementById('qc-search');
-            searchInput.value = drug.name;
-            document.getElementById('qc-dropdown').classList.add('hidden');
-            document.getElementById('qc-clear').classList.remove('hidden');
-
-            renderQuickCheckResult(drugId);
-
-            if (opts && opts.openModal && calculatedCrCl && calculatedEGFR) {
-                openDrugModal(drugId);
-            }
-        }
-
-        function renderQuickCheckResult(drugId) {
-            const drug = drugDatabase[drugId];
-            if (!drug) return;
-
-            document.getElementById('qc-empty').classList.add('hidden');
-            document.getElementById('qc-result').classList.remove('hidden');
-            document.getElementById('qc-drug-name').innerText = drug.name;
-            document.getElementById('qc-drug-cat').innerText = drug.category;
-            document.getElementById('qc-param-name').innerText = drug.param;
-            document.getElementById('qc-param-method').innerText = drug.param === 'eGFR' ? 'CKD-EPI' : 'Cockcroft-Gault';
-
-            const doseBlock = document.getElementById('qc-dose-block');
-            const needCalc = document.getElementById('qc-need-calc');
-
-            if (!calculatedCrCl || !calculatedEGFR) {
-                document.getElementById('qc-param-val').innerText = '--';
-                updateColorIndicator('qc-param-dot', null);
-                doseBlock.classList.add('hidden');
-                needCalc.classList.remove('hidden');
-                return;
-            }
-            needCalc.classList.add('hidden');
-            doseBlock.classList.remove('hidden');
-
-            const { valToUse, matchedRule } = evaluateDrugStatus(drug);
-            document.getElementById('qc-param-val').innerText = `${valToUse}${drug.param === 'eGFR' ? '' : ' ml/min'}`;
-            updateColorIndicator('qc-param-dot', valToUse);
-
-            const dangerBanner = document.getElementById('qc-danger-banner');
-            if (matchedRule && matchedRule.status === 'danger') {
-                dangerBanner.classList.remove('hidden');
-                document.getElementById('qc-danger-text').innerText = matchedRule.title;
-            } else {
-                dangerBanner.classList.add('hidden');
-            }
-
-            const standardRule = getStandardRule(drug);
-            document.getElementById('qc-standard-dose').innerText = standardRule ? standardRule.dose : '--';
-            document.getElementById('qc-adjusted-dose').innerText = matchedRule ? matchedRule.dose : '--';
-            document.getElementById('qc-note').innerText = matchedRule ? matchedRule.note : '';
-
-            // Skip the "standard -> adjusted" arrow when there's nothing to contrast
-            document.getElementById('qc-arrow-row').classList.toggle('hidden', matchedRule === standardRule);
-
-            const badge = document.getElementById('qc-badge');
-            const classification = classifyAdjustment(standardRule, matchedRule);
-            if (classification) {
-                badge.innerText = classification.label;
-                badge.className = `inline-block text-xs font-semibold px-2.5 py-1 rounded-full mt-2 ${classification.badgeClass}`;
-            }
-
-            document.getElementById('qc-reference').innerText = drug.reference;
-        }
-
-        function clearQuickCheck() {
-            quickCheckDrugKey = null;
-            const searchInput = document.getElementById('qc-search');
-            searchInput.value = '';
-            document.getElementById('qc-clear').classList.add('hidden');
-            document.getElementById('qc-dropdown').classList.add('hidden');
-            document.getElementById('qc-result').classList.add('hidden');
-            document.getElementById('qc-empty').classList.remove('hidden');
-            searchInput.focus();
-        }
-
-        function renderQuickCheckDropdown(term) {
-            const dropdown = document.getElementById('qc-dropdown');
-            term = term.trim().toLowerCase();
-
-            if (term.length < 1) {
-                dropdown.classList.add('hidden');
-                dropdown.innerHTML = '';
-                return;
-            }
-
-            const matches = Object.entries(drugDatabase).filter(([key, drug]) =>
-                drug.name.toLowerCase().includes(term) || drug.category.toLowerCase().includes(term)
-            );
-
-            dropdown.innerHTML = '';
-            if (matches.length === 0) {
-                dropdown.innerHTML = `<div class="px-4 py-3 text-sm text-gray-500 text-center">No drugs found</div>`;
-            } else {
-                matches.forEach(([key, drug]) => {
-                    const item = document.createElement('div');
-                    item.className = 'px-4 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors';
-                    item.innerHTML = `<div class="text-sm font-medium text-gray-800">${drug.name}</div><div class="text-xs text-gray-500">${drug.category}</div>`;
-                    item.onclick = () => selectQuickCheckDrug(key);
-                    dropdown.appendChild(item);
-                });
-            }
-            dropdown.classList.remove('hidden');
-        }
-
-        // --- Search & Category Filtering (drives the single merged grid) ---
+        // --- Category Filtering & Search ---
         function setPillActive(btn, isActive) {
+            if (!btn) return;
+            const isNSAID = btn.getAttribute('data-category') === 'NSAID';
             if (isActive) {
-                btn.classList.remove('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
-                btn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
-                btn.classList.remove('liquid-pop');
-                void btn.offsetWidth; // restart animation
-                btn.classList.add('liquid-pop');
+                btn.className = 'cat-pill active text-xs font-semibold px-4 py-2 rounded-full transition-all cursor-pointer bg-indigo-600 text-white ring-2 ring-indigo-600 ring-offset-2 shadow-sm scale-105';
+            } else if (isNSAID) {
+                btn.className = 'cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:border-amber-300';
             } else {
-                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm', 'liquid-pop');
-                btn.classList.add('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
+                btn.className = 'cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300';
             }
         }
 
         function filterCategory(cat, btnEl) {
             const buttons = document.querySelectorAll('.cat-pill');
 
-            if (activeCategory === cat) {
+            if (!cat) {
                 activeCategory = null;
-                buttons.forEach(b => setPillActive(b, false));
+                buttons.forEach(b => {
+                    const isAll = b.getAttribute('data-category') === '';
+                    setPillActive(b, isAll);
+                });
+            } else if (activeCategory === cat) {
+                activeCategory = null;
+                buttons.forEach(b => {
+                    const isAll = b.getAttribute('data-category') === '';
+                    setPillActive(b, isAll);
+                });
             } else {
                 activeCategory = cat;
-                buttons.forEach(b => setPillActive(b, b === btnEl));
+                buttons.forEach(b => {
+                    setPillActive(b, b === btnEl);
+                });
             }
             renderDrugGrid();
         }
 
         function handleSearchInput(term) {
             searchTerm = term.trim();
+            const clearBtn = document.getElementById('drug-search-clear');
+            if (clearBtn) {
+                if (searchTerm.length > 0) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+            }
             renderDrugGrid();
+        }
+
+        function clearDrugSearch() {
+            const input = document.getElementById('drug-search');
+            if (input) {
+                input.value = '';
+                searchTerm = '';
+            }
+            const clearBtn = document.getElementById('drug-search-clear');
+            if (clearBtn) clearBtn.classList.add('hidden');
+            renderDrugGrid();
+            if (input) input.focus();
         }
 
         // --- Copy to Clipboard Features ---
@@ -1874,25 +1808,6 @@
             }
         }
 
-        async function copyQuickCheckResult() {
-            if (!quickCheckDrugKey) {
-                showToast('Please select a drug first');
-                return;
-            }
-            if (!calculatedCrCl || !calculatedEGFR) {
-                showToast('Please calculate renal function first');
-                return;
-            }
-            const text = formatDrugRecommendationText(quickCheckDrugKey);
-            const success = await copyTextToClipboard(text);
-            if (success) {
-                const btn = document.getElementById('btn-copy-qc');
-                showButtonCopiedState(btn);
-                showToast('Dosing recommendation copied!');
-            } else {
-                showToast('Failed to copy recommendation');
-            }
-        }
 
         async function copyModalDrugResult() {
             if (!currentModalDrugKey) return;
@@ -1937,18 +1852,6 @@
 
             document.getElementById('drug-search').addEventListener('input', (e) => handleSearchInput(e.target.value));
 
-            // Quick single-drug check (sidebar): search + dropdown
-            const qcSearch = document.getElementById('qc-search');
-            qcSearch.addEventListener('input', (e) => {
-                if (e.target.value.trim() === '') document.getElementById('qc-clear').classList.add('hidden');
-                renderQuickCheckDropdown(e.target.value);
-            });
-            document.addEventListener('click', (e) => {
-                if (!qcSearch.closest('.relative').contains(e.target)) {
-                    document.getElementById('qc-dropdown').classList.add('hidden');
-                }
-            });
-
             // Modal dismissal via ESC key
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') closeDrugModal();
@@ -1978,7 +1881,7 @@
             if ('caches' in window) {
                 caches.keys().then((names) => {
                     for (const name of names) {
-                        if (name !== 'kidny-cache-v2') {
+                        if (name !== 'kidny-cache-v3') {
                             caches.delete(name);
                         }
                     }

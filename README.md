@@ -53,36 +53,36 @@ Reference: ADA Guidelines
 - **Interactive Feedback**: Visual transition (`Copied! ✓`), emerald badge highlight, and auto-dismissing toast notifications.
 - **Cross-Browser Clipboard**: Uses modern `navigator.clipboard` with an automatic `document.execCommand('copy')` textarea fallback for legacy or non-secure contexts.
 
-### 3. 💊 Medication Dosing Dashboard
+### 3. 💊 Medication Dosing Dashboard & Clinical Safety
+- **Pinned Renal Panel (Sticky Sidebar)**:
+  - The left panel (Patient Inputs & Renal Function card) stays pinned (`sticky top-6 self-start`) on desktop screens, ensuring calculated CrCl and eGFR never scroll out of view while exploring medications.
+- **Consolidated Search & Category Chips**:
+  - Unified top search bar with instant clear button (`✕`) for rapid medication lookup.
+  - High-contrast Category Chips with distinct active pill styles, including **"ทั้งหมด (All)"** and quick filter **"⚠️ NSAIDs"**.
 - **Status Badges & Visual Categorization**:
   - 🛑 **Contraindicated**: Highlighted with red danger styling when kidney function falls below safe thresholds.
   - ⚠️ **Dose Adjustment Required**: Amber warnings for dose reductions or extended dosing intervals.
-  - ✅ **Normal / Safe Dosing**: Green badges when kidney clearance permits standard regimens.
-- **Therapeutic Class Pills**: Single-click filtering across categories:
-  - Antidiabetics (Metformin, Empagliflozin, Dapagliflozin, etc.)
-  - Antibiotics & Antimicrobials (Amoxicillin/Clav, Ciprofloxacin, Levofloxacin, Ceftriaxone, Cefazolin, Vancomycin, Gentamicin, Meropenem)
-  - Cardiovascular & Anticoagulants (Enoxaparin, Spironolactone, Digoxin)
-  - Analgesics & Neuropathic Pain (Gabapentin, Pregabalin, Colchicine)
-  - Anti-gout (Allopurinol, Colchicine)
-  - Gastrointestinal & H2 Blockers (Famotidine)
-- **Live Search**: Instant case-insensitive search by medication name or category.
+  - ✅ **Normal Dosing (No Adjustment Needed)**: Green badges when kidney clearance permits standard regimens.
+- **Clinical Safety & AKI Caution**:
+  - **NSAIDs AKI Alert**: Prominent amber badge on all NSAID cards and modal: `⚠️ ระวังความเสี่ยงไตวายเฉียบพลัน (AKI) หลีกเลี่ยงการใช้ต่อเนื่อง`.
+  - **Explicit Parameter Criteria**: Every drug card indicates whether dose adjustment is governed by CrCl or eGFR along with the patient's evaluated value (e.g. `เกณฑ์: CrCl (Cockcroft-Gault) = 60.8 mL/min` or `เกณฑ์: eGFR (CKD-EPI) = 67.1 mL/min/1.73m²`).
+  - **Standardized 3-Line Dose Formatting**: Every medication card displays uniform clinical parameters:
+    1. **ขนาดยาที่แนะนำ (Recommended Dose)**
+    2. **ความถี่ (Frequency)**
+    3. **ขนาดยาสูงสุดต่อวัน (Max Daily Dose)**
 
-### 4. 🔍 Quick Check Sidebar
-- Fast single-drug lookup without navigating away from the patient input card.
-- Side-by-side comparison between **Standard Regimen** and **Adjusted Regimen**.
-- Clinical adjustment tags (*Dose Reduced*, *Interval Extended*, *Dose Reduced + Interval Extended*, *Contraindicated*, *No Adjustment Needed*).
-
-### 5. 📖 Tiered Rule Details Modal
+### 4. 📖 Tiered Rule Details Modal
 - Full access to all tiered clearance cut-offs for any drug.
 - In-depth clinical instructions (e.g. hemodialysis dosing, post-dialysis supplemental doses, hydration requirements).
+- Prominent NSAID caution warning banner for nephrotoxic analgesic agents.
 - Authoritative references (Thai Rheumatism Association, Sanford Guide, KDIGO, US FDA Prescribing Information).
 
-### 6. 📱 Progressive Web App (PWA) & Offline Mode
+### 5. 📱 Progressive Web App (PWA) & Offline Mode
 - **Zero-Internet Operation**: Medical teams in shielded hospital wards or basements retain full functionality.
 - **Service Worker (`sw.js`)**:
   - **Network-First Strategy** for HTML navigations (`index.html`, `index2.html`) ensuring immediate live updates when online while falling back seamlessly to offline cache.
   - **Stale-While-Revalidate Strategy** for styling, vector icons, and font dependencies.
-  - Dynamic cache migration (`kidny-cache-v2`) with automatic purging of obsolete caches.
+  - Dynamic cache migration (`kidny-cache-v3`) with automatic purging of obsolete caches.
 - **Installable Native App Feel**:
   - Add to Home Screen / Dock across macOS, iOS (Safari Share menu), Android (Chrome install banner), and Windows (Edge).
   - Standalone display mode with custom theme colors (`#6366f1`).
@@ -130,7 +130,7 @@ KIDNY/
 ├── index.html              # Primary Bento-grid application with full drug DB & liquid animations
 ├── index2.html             # Clean reference / secondary layout
 ├── manifest.json           # PWA Web App Manifest (standalone display, theme color, icons)
-├── sw.js                   # Service Worker (Network-First for navigation, offline caching v2)
+├── sw.js                   # Service Worker (Network-First for navigation, offline caching v3)
 ├── favicon.ico             # Browser tab icon
 ├── icons/                  # Custom medical kidney icon assets
 │   ├── kidney.svg          # Primary vector kidney icon
