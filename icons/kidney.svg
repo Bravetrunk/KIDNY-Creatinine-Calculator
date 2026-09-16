@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background squircle gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f3f0ff"/>
+    </linearGradient>
+
+    <!-- Kidney body gradient (rich indigo to vivid violet-rose) -->
+    <linearGradient id="kidneyGrad" x1="15%" y1="10%" x2="85%" y2="90%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="40%" stop-color="#6366f1"/>
+      <stop offset="80%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+
+    <!-- Renal cortex highlight -->
+    <linearGradient id="highlightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Renal pelvis / calyces gradient -->
+    <linearGradient id="pelvisGrad" x1="0%" y1="30%" x2="100%" y2="70%">
+      <stop offset="0%" stop-color="#fdf4ff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#e0e7ff" stop-opacity="0.75"/>
+    </linearGradient>
+
+    <!-- Artery gradient -->
+    <linearGradient id="arteryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f87171"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+
+    <!-- Vein gradient -->
+    <linearGradient id="veinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+
+    <!-- Soft drop shadow -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#6366f1" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle App Icon Container -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)"/>
+  <rect width="504" height="504" x="4" y="4" rx="111" fill="none" stroke="#e0e7ff" stroke-width="4"/>
+
+  <!-- Main Kidney Group -->
+  <g transform="translate(18, 12)" filter="url(#dropShadow)">
+    <!-- Renal Vein (Blue vessel exiting hilum) -->
+    <path d="M175 240 C140 236 108 248 90 262" fill="none" stroke="url(#veinGrad)" stroke-width="16" stroke-linecap="round"/>
+
+    <!-- Renal Artery (Red vessel entering hilum) -->
+    <path d="M185 272 C150 274 122 290 102 312" fill="none" stroke="url(#arteryGrad)" stroke-width="14" stroke-linecap="round"/>
+
+    <!-- Ureter (Tube descending from renal pelvis) -->
+    <path d="M220 310 C210 360 178 405 160 435" fill="none" stroke="#cbd5e1" stroke-width="18" stroke-linecap="round"/>
+    <path d="M220 310 C210 360 178 405 160 435" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
+
+    <!-- Kidney Body (Anatomical Bean Shape) -->
+    <!-- Starts at superior pole -> lateral convex border -> inferior pole -> medial concave hilum -> back to top -->
+    <path d="M260 88
+             C330 84 410 135 425 220
+             C440 305 405 385 345 420
+             C285 455 235 435 220 380
+             C210 345 212 320 185 295
+             C165 275 168 245 190 220
+             C215 190 205 160 215 130
+             C225 102 242 89 260 88 Z"
+          fill="url(#kidneyGrad)" />
+
+    <!-- Cortex Outer Edge Highlight -->
+    <path d="M265 98
+             C325 95 395 142 410 220
+             C422 290 395 365 340 405"
+          fill="none" stroke="url(#highlightGrad)" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- Medulla & Renal Pelvis (Stylized inner anatomical calyces) -->
+    <!-- Calyx 1 (Superior) -->
+    <path d="M290 160 C325 165 340 185 335 205 C330 215 315 215 300 205 C275 190 270 175 290 160 Z"
+          fill="url(#pelvisGrad)" opacity="0.75"/>
+
+    <!-- Calyx 2 (Major / Middle) -->
+    <path d="M325 240 C358 248 365 272 355 290 C345 302 328 298 315 285 C295 265 295 248 325 240 Z"
+          fill="url(#pelvisGrad)" opacity="0.75"/>
+
+    <!-- Calyx 3 (Inferior) -->
+    <path d="M280 340 C310 355 315 375 300 390 C285 400 270 392 260 375 C248 355 255 340 280 340 Z"
+          fill="url(#pelvisGrad)" opacity="0.75"/>
+
+    <!-- Central Renal Pelvis Core connecting to hilum -->
+    <path d="M225 260
+             C250 230 290 235 295 265
+             C300 295 270 315 240 305
+             C225 300 215 285 225 260 Z"
+          fill="#ffffff" opacity="0.6"/>
+  </g>
+</svg>

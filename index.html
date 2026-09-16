@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KIDNY — Renal Dose Calculator</title>
+    <title>KIDNY: Creatinine Calculator</title>
+    <!-- PWA & Favicon Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="KIDNY">
+    <link rel="icon" type="image/svg+xml" href="icons/kidney.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <!-- ใช้ Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- ใช้ Font Inter เพื่อความคล้ายคลึงกับ SF Pro ใน Reference -->
@@ -194,14 +203,24 @@
     <div class="liquid-blob b3"></div>
 
     <!-- Page Header -->
-    <header class="page-content max-w-[1600px] mx-auto mb-6 lg:mb-8 px-1">
+    <header class="page-content max-w-[1600px] mx-auto mb-6 lg:mb-8 px-1 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-2xl bg-[#c2a3ff] flex items-center justify-center text-xl shrink-0">🩺</div>
+            <div class="w-11 h-11 rounded-2xl bg-white border border-indigo-100 shadow-sm flex items-center justify-center p-1.5 shrink-0 overflow-hidden hover:scale-105 transition-transform">
+                <img src="icons/kidney-mark.svg" alt="KIDNY Kidney Icon" class="w-full h-full object-contain">
+            </div>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 tracking-tight leading-none">KIDNY</h1>
-                <p class="text-sm text-gray-600 mt-1">Renal Dose Calculator</p>
+                <p class="text-sm text-gray-600 mt-1">Creatinine Calculator</p>
             </div>
         </div>
+        <button id="pwa-install-btn" type="button" class="hidden text-xs font-semibold text-indigo-600 bg-white hover:bg-indigo-50 border border-indigo-200/80 px-3.5 py-2 rounded-full flex items-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95" title="Install KIDNY as an App">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Install App</span>
+        </button>
     </header>
 
     <div class="page-content max-w-[1600px] mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
@@ -267,12 +286,21 @@
 
             <!-- 2. Renal Function Card -->
             <div class="bento-card">
-                <div class="flex items-center gap-2 mb-6">
-                    <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">Renal Function</h2>
-                    <svg id="renal-spinner" class="hidden w-4 h-4 text-indigo-500 animate-spin" viewBox="0 0 24 24" fill="none" aria-label="Recalculating">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
+                <div class="flex items-center justify-between gap-2 mb-6">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">Renal Function</h2>
+                        <svg id="renal-spinner" class="hidden w-4 h-4 text-indigo-500 animate-spin" viewBox="0 0 24 24" fill="none" aria-label="Recalculating">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                    </div>
+                    <button id="btn-copy-renal" type="button" onclick="copyRenalResult()" disabled class="text-xs font-semibold text-gray-400 bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-200 hover:text-gray-700 px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all cursor-pointer" title="Copy renal function results" aria-label="Copy renal function results">
+                        <svg class="w-3.5 h-3.5 copy-icon shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span class="copy-label">Copy Result</span>
+                    </button>
                 </div>
 
                 <!-- Results Display -->
@@ -321,8 +349,19 @@
 
                 <!-- Selected drug -->
                 <div id="qc-result" class="hidden mt-4">
-                    <div id="qc-drug-name" class="text-lg font-bold text-gray-900 leading-snug">--</div>
-                    <div id="qc-drug-cat" class="text-sm text-gray-600">--</div>
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div id="qc-drug-name" class="text-lg font-bold text-gray-900 leading-snug">--</div>
+                            <div id="qc-drug-cat" class="text-sm text-gray-600">--</div>
+                        </div>
+                        <button id="btn-copy-qc" type="button" onclick="copyQuickCheckResult()" class="text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 active:scale-95 px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all cursor-pointer shrink-0" title="Copy dosing recommendation" aria-label="Copy dosing recommendation">
+                            <svg class="w-3.5 h-3.5 copy-icon shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <span class="copy-label">Copy</span>
+                        </button>
+                    </div>
 
                     <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100">
                         <span id="qc-param-dot" class="w-2 h-2 rounded-full bg-gray-300 shrink-0"></span>
@@ -489,10 +528,25 @@
             </div>
 
             <!-- Footer -->
-            <div class="flex justify-end p-4 border-t border-gray-100">
-                <button onclick="closeDrugModal()" class="px-5 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-sm font-semibold text-gray-700 transition">Close</button>
+            <div class="flex justify-between items-center p-4 border-t border-gray-100">
+                <button id="btn-copy-modal" type="button" onclick="copyModalDrugResult()" class="px-4 py-2 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-semibold flex items-center gap-2 transition cursor-pointer active:scale-95" title="Copy recommendation to clipboard" aria-label="Copy recommendation to clipboard">
+                    <svg class="w-4 h-4 copy-icon shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span class="copy-label">Copy Recommendation</span>
+                </button>
+                <button onclick="closeDrugModal()" class="px-5 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-sm font-semibold text-gray-700 transition cursor-pointer">Close</button>
             </div>
         </div>
+    </div>
+
+    <!-- Copy Notification Toast -->
+    <div id="copy-toast" role="status" aria-live="polite" class="fixed bottom-6 right-6 z-[120] pointer-events-none opacity-0 translate-y-8 transition-all duration-300 ease-out flex items-center gap-2.5 bg-gray-900/95 text-white text-sm font-medium px-4 py-3 rounded-2xl shadow-xl backdrop-blur-sm border border-gray-800">
+        <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span id="toast-message">Copied to clipboard!</span>
     </div>
 
     <!-- JavaScript Logic -->
@@ -1160,6 +1214,13 @@
                 updateColorIndicator('dot-crcl', null);
                 updateColorIndicator('dot-egfr', null);
 
+                const copyBtn = document.getElementById('btn-copy-renal');
+                if (copyBtn) {
+                    copyBtn.disabled = true;
+                    copyBtn.classList.add('text-gray-400', 'disabled:opacity-40', 'disabled:cursor-not-allowed');
+                    copyBtn.classList.remove('text-gray-700');
+                }
+
                 searchInput.disabled = true;
                 searchInput.placeholder = "Search";
 
@@ -1207,6 +1268,13 @@
 
             updateColorIndicator('dot-crcl', calculatedCrCl);
             updateColorIndicator('dot-egfr', calculatedEGFR);
+
+            const copyBtn = document.getElementById('btn-copy-renal');
+            if (copyBtn) {
+                copyBtn.disabled = false;
+                copyBtn.classList.remove('text-gray-400', 'disabled:opacity-40', 'disabled:cursor-not-allowed');
+                copyBtn.classList.add('text-gray-700');
+            }
 
             searchInput.disabled = false;
             searchInput.placeholder = "Search";
@@ -1364,12 +1432,31 @@
         function buildDrugCard({ key, drug, matchedRule }, group) {
             const borderAccentMap = { red: 'border-l-red-400', yellow: 'border-l-yellow-400', green: 'border-l-green-400' };
 
-            const card = document.createElement('button');
-            card.type = 'button';
-            card.onclick = () => openDrugModal(key);
-            card.className = `drug-card text-left w-full bg-white border border-gray-200 border-l-4 ${borderAccentMap[group.accent]} rounded-lg p-4 flex flex-col gap-2 cursor-pointer`;
+            const card = document.createElement('div');
+            card.role = 'button';
+            card.tabIndex = 0;
+            card.onclick = (e) => {
+                if (e.target.closest('.card-copy-btn')) return;
+                openDrugModal(key);
+            };
+            card.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    if (e.target.closest('.card-copy-btn')) return;
+                    e.preventDefault();
+                    openDrugModal(key);
+                }
+            };
+            card.className = `drug-card group relative text-left w-full bg-white border border-gray-200 border-l-4 ${borderAccentMap[group.accent]} rounded-lg p-4 flex flex-col gap-2 cursor-pointer`;
             card.innerHTML = `
-                <div class="text-lg font-bold text-gray-900 underline decoration-1 underline-offset-2 decoration-gray-300 leading-snug">${drug.name}</div>
+                <div class="flex items-start justify-between gap-2">
+                    <div class="text-lg font-bold text-gray-900 underline decoration-1 underline-offset-2 decoration-gray-300 leading-snug group-hover:text-indigo-600 transition-colors">${drug.name}</div>
+                    <button type="button" onclick="event.stopPropagation(); copyDrugRecommendation('${key}', this)" class="card-copy-btn text-gray-400 hover:text-indigo-600 hover:bg-gray-100 p-1.5 rounded-lg transition-all cursor-pointer" title="Copy recommendation" aria-label="Copy recommendation for ${drug.name}">
+                        <svg class="w-4 h-4 copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
                 <div class="text-sm text-gray-600">${drug.category}</div>
                 <div class="text-sm font-bold text-gray-900 mt-1">Recommended Dose</div>
                 <div class="text-sm text-gray-700">${matchedRule.dose}</div>
@@ -1642,6 +1729,200 @@
             renderDrugGrid();
         }
 
+        // --- Copy to Clipboard Features ---
+        let toastTimer = null;
+        function showToast(message) {
+            const toast = document.getElementById('copy-toast');
+            const toastMsg = document.getElementById('toast-message');
+            if (!toast || !toastMsg) return;
+
+            toastMsg.innerText = message;
+            toast.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+            }, 2500);
+        }
+
+        async function copyTextToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (err) {
+                    console.warn('Clipboard API failed, falling back to execCommand', err);
+                }
+            }
+
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                textArea.setAttribute('readonly', '');
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const successful = document.execCommand('copy');
+                textArea.remove();
+                if (!successful) throw new Error('execCommand returned false');
+                return true;
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                return false;
+            }
+        }
+
+        function showButtonCopiedState(buttonEl) {
+            if (!buttonEl) return;
+            const labelEl = buttonEl.querySelector('.copy-label');
+            const iconEl = buttonEl.querySelector('.copy-icon');
+
+            const origHtml = buttonEl.innerHTML;
+
+            buttonEl.classList.add('text-emerald-700', 'bg-emerald-50');
+            if (labelEl) {
+                labelEl.innerText = 'Copied!';
+            }
+            if (iconEl) {
+                iconEl.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+                iconEl.setAttribute('stroke', '#059669');
+                iconEl.setAttribute('stroke-width', '2.5');
+            }
+
+            setTimeout(() => {
+                buttonEl.innerHTML = origHtml;
+                buttonEl.classList.remove('text-emerald-700', 'bg-emerald-50');
+            }, 2000);
+        }
+
+        function getPatientSummary() {
+            const age = document.getElementById('input-age') ? document.getElementById('input-age').value : '';
+            const weight = document.getElementById('input-weight') ? document.getElementById('input-weight').value : '';
+            const scr = document.getElementById('input-scr') ? document.getElementById('input-scr').value : '';
+            const genderStr = patientGender === 'male' ? 'Male' : 'Female';
+            const parts = [];
+            if (age) parts.push(`${age} yo ${genderStr}`);
+            else parts.push(genderStr);
+            if (weight) parts.push(`Weight: ${weight} kg`);
+            if (scr) parts.push(`SCr: ${scr} mg/dL`);
+            return parts.join(' | ');
+        }
+
+        function getRenalResultText() {
+            const crcl = calculatedCrCl || '--';
+            const egfr = calculatedEGFR || '--';
+            const stageEl = document.getElementById('val-ckd-stage');
+            const stage = stageEl ? stageEl.innerText : '--';
+
+            return [
+                `• CrCl : ${crcl} mL/min`,
+                `• eGFR : ${egfr} mL/min/1.73m²`,
+                `• CKD Stage: ${stage}`
+            ].join('\n');
+        }
+
+        function formatDrugRecommendationText(drugId) {
+            const drug = drugDatabase[drugId];
+            if (!drug) return '';
+            const { valToUse, matchedRule } = evaluateDrugStatus(drug);
+            const standardRule = getStandardRule(drug);
+            const classification = classifyAdjustment(standardRule, matchedRule);
+            const patient = getPatientSummary();
+            const paramUnit = drug.param === 'eGFR' ? 'mL/min/1.73m²' : 'mL/min';
+
+            const lines = [
+                `[KIDNY: Creatinine Calculator — Renal Dose Recommendation]`,
+                `Drug: ${drug.name} (${drug.category})`,
+                `Patient: ${patient}`,
+                `Renal Function: ${drug.param} ${valToUse} ${paramUnit} (${drug.param === 'eGFR' ? 'CKD-EPI' : 'Cockcroft-Gault'})`,
+                `Recommended Dose: ${matchedRule ? matchedRule.dose : '--'}`
+            ];
+
+            if (standardRule && matchedRule && standardRule.dose !== matchedRule.dose) {
+                lines.push(`Standard Dose: ${standardRule.dose}`);
+            }
+            if (classification) {
+                lines.push(`Adjustment: ${classification.label}`);
+            }
+            if (matchedRule && matchedRule.note) {
+                lines.push(`Clinical Note: ${matchedRule.note}`);
+            }
+            if (drug.reference) {
+                lines.push(`Reference: ${drug.reference}`);
+            }
+            return lines.join('\n');
+        }
+
+        async function copyRenalResult() {
+            if (!calculatedCrCl || !calculatedEGFR) {
+                showToast('Please calculate renal function first');
+                return;
+            }
+            const text = getRenalResultText();
+            const success = await copyTextToClipboard(text);
+            if (success) {
+                const btn = document.getElementById('btn-copy-renal');
+                showButtonCopiedState(btn);
+                showToast('Renal function copied to clipboard!');
+            } else {
+                showToast('Failed to copy result');
+            }
+        }
+
+        async function copyQuickCheckResult() {
+            if (!quickCheckDrugKey) {
+                showToast('Please select a drug first');
+                return;
+            }
+            if (!calculatedCrCl || !calculatedEGFR) {
+                showToast('Please calculate renal function first');
+                return;
+            }
+            const text = formatDrugRecommendationText(quickCheckDrugKey);
+            const success = await copyTextToClipboard(text);
+            if (success) {
+                const btn = document.getElementById('btn-copy-qc');
+                showButtonCopiedState(btn);
+                showToast('Dosing recommendation copied!');
+            } else {
+                showToast('Failed to copy recommendation');
+            }
+        }
+
+        async function copyModalDrugResult() {
+            if (!currentModalDrugKey) return;
+            const text = formatDrugRecommendationText(currentModalDrugKey);
+            const success = await copyTextToClipboard(text);
+            if (success) {
+                const btn = document.getElementById('btn-copy-modal');
+                showButtonCopiedState(btn);
+                showToast('Dosing recommendation copied!');
+            } else {
+                showToast('Failed to copy recommendation');
+            }
+        }
+
+        async function copyDrugRecommendation(drugKey, buttonEl) {
+            if (!calculatedCrCl || !calculatedEGFR) {
+                showToast('Please calculate renal function first');
+                return;
+            }
+            const text = formatDrugRecommendationText(drugKey);
+            const success = await copyTextToClipboard(text);
+            if (success) {
+                showButtonCopiedState(buttonEl);
+                const drug = drugDatabase[drugKey];
+                showToast(`${drug ? drug.name : 'Drug'} recommendation copied!`);
+            } else {
+                showToast('Failed to copy recommendation');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             renderDrugGrid(); // Show empty state until renal function is calculated
 
@@ -1671,6 +1952,64 @@
             // Modal dismissal via ESC key
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') closeDrugModal();
+            });
+
+            // --- PWA & Service Worker Registration ---
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js')
+                        .then((reg) => {
+                            console.log('KIDNY SW registered with scope:', reg.scope);
+                            reg.update(); // check for updated sw.js immediately
+                        })
+                        .catch((err) => console.warn('KIDNY SW registration failed:', err));
+                });
+
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        refreshing = true;
+                        window.location.reload();
+                    }
+                });
+            }
+
+            // Immediately purge any stale v1 caches
+            if ('caches' in window) {
+                caches.keys().then((names) => {
+                    for (const name of names) {
+                        if (name !== 'kidny-cache-v2') {
+                            caches.delete(name);
+                        }
+                    }
+                });
+            }
+
+            // PWA Install Prompt Listener
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                const installBtn = document.getElementById('pwa-install-btn');
+                if (installBtn) {
+                    installBtn.classList.remove('hidden');
+                    installBtn.onclick = async () => {
+                        installBtn.classList.add('hidden');
+                        if (deferredPrompt) {
+                            deferredPrompt.prompt();
+                            const { outcome } = await deferredPrompt.userChoice;
+                            if (outcome === 'accepted') {
+                                showToast('Installing KIDNY...');
+                            }
+                            deferredPrompt = null;
+                        }
+                    };
+                }
+            });
+            window.addEventListener('appinstalled', () => {
+                const installBtn = document.getElementById('pwa-install-btn');
+                if (installBtn) installBtn.classList.add('hidden');
+                showToast('KIDNY installed successfully!');
             });
         });
     </script>
