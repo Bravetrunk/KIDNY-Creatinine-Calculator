@@ -1,5 +1,5 @@
 // KIDNY Service Worker - Offline Support & Asset Caching
-const CACHE_NAME = 'kidny-cache-v3';
+const CACHE_NAME = 'kidny-cache-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

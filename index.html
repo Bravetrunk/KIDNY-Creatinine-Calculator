@@ -61,13 +61,35 @@
             z-index: 1;
         }
 
-        /* สไตล์ Card โค้งมนแบบ Reference */
+        /* สไตล์ Card โค้งมนแบบ Bento ที่ปรับขนาดตามหน้าจอ (Adaptive) */
         .bento-card {
             background-color: #ffffff;
-            border-radius: 32px;
-            padding: 28px;
+            border-radius: 20px;
+            padding: 16px;
             box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
         }
+        @media (min-width: 640px) {
+            .bento-card {
+                border-radius: 26px;
+                padding: 22px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .bento-card {
+                border-radius: 28px;
+                padding: 24px;
+            }
+        }
+
+        /* Utility: Hide scrollbar but keep scrollable */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Utility: Sleek modern scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 9999px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
         /* Input แบบใหม่ โค้งมนและดูสะอาด */
         .soft-input {
@@ -195,7 +217,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-6 lg:p-8">
+<body class="min-h-screen lg:h-screen lg:overflow-hidden flex flex-col p-3 sm:p-4 lg:p-5 xl:px-8 xl:py-4 selection:bg-indigo-500 selection:text-white">
 
     <!-- Liquid animated background blobs -->
     <div class="liquid-blob b1"></div>
@@ -203,17 +225,17 @@
     <div class="liquid-blob b3"></div>
 
     <!-- Page Header -->
-    <header class="page-content max-w-[1600px] mx-auto mb-6 lg:mb-8 px-1 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-2xl bg-white border border-indigo-100 shadow-sm flex items-center justify-center p-1.5 shrink-0 overflow-hidden hover:scale-105 transition-transform">
+    <header class="page-content w-full max-w-[1720px] mx-auto mb-3 lg:mb-4 px-1 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-white border border-indigo-100 shadow-sm flex items-center justify-center p-1.5 shrink-0 overflow-hidden hover:scale-105 transition-transform">
                 <img src="icons/kidney-mark.svg" alt="KIDNY Kidney Icon" class="w-full h-full object-contain">
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 tracking-tight leading-none">KIDNY</h1>
-                <p class="text-sm text-gray-600 mt-1">Creatinine Calculator</p>
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight leading-none">KIDNY</h1>
+                <p class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Creatinine Calculator</p>
             </div>
         </div>
-        <button id="pwa-install-btn" type="button" class="hidden text-xs font-semibold text-indigo-600 bg-white hover:bg-indigo-50 border border-indigo-200/80 px-3.5 py-2 rounded-full flex items-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95" title="Install KIDNY as an App">
+        <button id="pwa-install-btn" type="button" class="hidden text-xs font-semibold text-indigo-600 bg-white hover:bg-indigo-50 border border-indigo-200/80 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full flex items-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95" title="Install KIDNY as an App">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
@@ -223,78 +245,74 @@
         </button>
     </header>
 
-    <div class="page-content max-w-[1600px] mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+    <div class="page-content w-full max-w-[1720px] mx-auto flex-1 min-h-0 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch">
 
-        <!-- ==================== Sidebar (Patient Inputs, sticky top-6) ==================== -->
-        <aside class="w-full lg:w-[340px] xl:w-[380px] lg:shrink-0 lg:sticky lg:top-6 self-start flex flex-col gap-6">
+        <!-- ==================== Sidebar (Patient Inputs & Renal Function) ==================== -->
+        <aside class="w-full lg:w-[330px] xl:w-[370px] lg:shrink-0 flex flex-col gap-3.5 sm:gap-4 lg:overflow-y-auto custom-scrollbar pr-0 lg:pr-1">
 
             <!-- 1. Input & Calculator Card -->
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">Calculator</h2>
+            <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-5 shrink-0">
+                <div class="flex justify-between items-center mb-3 sm:mb-4">
+                    <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight">Calculator</h2>
+                    <button type="button" onclick="resetCalculator()" class="text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100/80 flex items-center gap-1 cursor-pointer transition-colors px-2.5 py-1 rounded-lg" title="Reset inputs">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                        Reset
+                    </button>
                 </div>
 
-                <div class="space-y-4">
+                <div class="space-y-2.5 sm:space-y-3">
                     <!-- Age -->
                     <div class="flex flex-col">
-                        <label for="input-age" class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Age</label>
+                        <label for="input-age" class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Age</label>
                         <div id="shell-age" class="calc-field-shell">
                             <input type="number" id="input-age" class="calc-field-value" placeholder="65" aria-describedby="hint-age">
-                            <span class="text-sm text-gray-600 font-medium shrink-0">years</span>
+                            <span class="text-xs sm:text-sm text-gray-600 font-medium shrink-0">years</span>
                         </div>
-                        <p id="hint-age" class="text-[11px] text-gray-500 mt-1"></p>
+                        <p id="hint-age" class="text-[11px] text-gray-500 mt-0.5"></p>
                     </div>
 
                     <!-- Gender Toggle -->
                     <div class="flex flex-col">
-                        <label class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Gender</label>
+                        <label class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Gender</label>
                         <div class="bg-gray-100 p-1 rounded-xl flex gap-1">
-                            <button type="button" onclick="setGender('male')" id="btn-male" class="flex-1 py-2 text-sm rounded-lg transition-all bg-white text-indigo-600 font-semibold shadow-sm">Male</button>
-                            <button type="button" onclick="setGender('female')" id="btn-female" class="flex-1 py-2 text-sm rounded-lg transition-all text-gray-500 hover:text-gray-700 font-medium">Female</button>
+                            <button type="button" onclick="setGender('male')" id="btn-male" class="flex-1 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-all bg-white text-indigo-600 font-semibold shadow-sm">Male</button>
+                            <button type="button" onclick="setGender('female')" id="btn-female" class="flex-1 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-all text-gray-500 hover:text-gray-700 font-medium">Female</button>
                         </div>
                     </div>
 
                     <!-- Weight -->
                     <div class="flex flex-col">
-                        <label for="input-weight" class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Weight</label>
+                        <label for="input-weight" class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Weight</label>
                         <div id="shell-weight" class="calc-field-shell">
                             <input type="number" id="input-weight" class="calc-field-value" placeholder="70" aria-describedby="hint-weight">
-                            <span class="text-sm text-gray-600 font-medium shrink-0">kg</span>
+                            <span class="text-xs sm:text-sm text-gray-600 font-medium shrink-0">kg</span>
                         </div>
-                        <p id="hint-weight" class="text-[11px] text-gray-500 mt-1"></p>
+                        <p id="hint-weight" class="text-[11px] text-gray-500 mt-0.5"></p>
                     </div>
 
                     <!-- SCr -->
                     <div class="flex flex-col">
-                        <label for="input-scr" class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">SCr</label>
+                        <label for="input-scr" class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">SCr</label>
                         <div id="shell-scr" class="calc-field-shell">
                             <input type="number" id="input-scr" step="0.1" class="calc-field-value" placeholder="1.2" aria-describedby="hint-scr">
-                            <span class="text-sm text-gray-600 font-medium shrink-0">mg/dL</span>
+                            <span class="text-xs sm:text-sm text-gray-600 font-medium shrink-0">mg/dL</span>
                         </div>
-                        <p id="hint-scr" class="text-[11px] text-gray-500 mt-1"></p>
+                        <p id="hint-scr" class="text-[11px] text-gray-500 mt-0.5"></p>
                     </div>
-                </div>
-
-                <!-- Reset: moved to the bottom as a subtle secondary action -->
-                <div class="flex justify-center mt-3">
-                    <button type="button" onclick="resetCalculator()" class="text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 cursor-pointer transition-colors px-4 py-2 rounded-lg">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-                        Reset
-                    </button>
                 </div>
             </div>
 
             <!-- 2. Renal Function Card -->
-            <div class="bento-card">
-                <div class="flex items-center justify-between gap-2 mb-5">
+            <div class="bento-card p-4 sm:p-5 shrink-0">
+                <div class="flex items-center justify-between gap-2 mb-3 sm:mb-4">
                     <div class="flex items-center gap-2">
-                        <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">Renal Function</h2>
+                        <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight">Renal Function</h2>
                         <svg id="renal-spinner" class="hidden w-4 h-4 text-indigo-500 animate-spin" viewBox="0 0 24 24" fill="none" aria-label="Recalculating">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
                     </div>
-                    <button id="btn-copy-renal" type="button" onclick="copyRenalResult()" disabled class="text-xs font-semibold text-gray-400 bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-200 hover:text-gray-700 px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all cursor-pointer" title="Copy renal function results" aria-label="Copy renal function results">
+                    <button id="btn-copy-renal" type="button" onclick="copyRenalResult()" disabled class="text-xs font-semibold text-gray-400 bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-200 hover:text-gray-700 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full flex items-center gap-1.5 transition-all cursor-pointer" title="Copy renal function results" aria-label="Copy renal function results">
                         <svg class="w-3.5 h-3.5 copy-icon shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -304,138 +322,148 @@
                 </div>
 
                 <!-- Results Display -->
-                <div class="flex flex-col gap-3">
-                    <div class="stat-block flex items-center justify-between bg-gray-50 border border-gray-100 p-4 rounded-2xl">
+                <div class="flex flex-col gap-2.5 sm:gap-3">
+                    <div class="stat-block flex items-center justify-between bg-gray-50 border border-gray-100 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl">
                         <div class="flex items-center">
-                            <span id="dot-crcl" class="w-2.5 h-2.5 rounded-full bg-gray-300 mr-3"></span>
-                            <span class="text-sm font-medium text-gray-600">CrCl (CG)</span>
+                            <span id="dot-crcl" class="w-2.5 h-2.5 rounded-full bg-gray-300 mr-2.5"></span>
+                            <span class="text-xs sm:text-sm font-medium text-gray-600">CrCl (CG)</span>
                         </div>
                         <div class="flex items-baseline">
-                            <span id="val-crcl" class="result-value text-xl font-bold text-gray-900">--</span>
+                            <span id="val-crcl" class="result-value text-lg sm:text-xl font-bold text-gray-900">--</span>
                             <span class="text-xs text-gray-600 ml-1">ml/min</span>
                         </div>
                     </div>
-                    <div class="stat-block flex items-center justify-between bg-gray-50 border border-gray-100 p-4 rounded-2xl">
+                    <div class="stat-block flex items-center justify-between bg-gray-50 border border-gray-100 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl">
                         <div class="flex flex-col">
                             <div class="flex items-center">
-                                <span id="dot-egfr" class="w-2.5 h-2.5 rounded-full bg-gray-300 mr-3"></span>
-                                <span class="text-sm font-medium text-gray-600">eGFR (CKD-EPI)</span>
+                                <span id="dot-egfr" class="w-2.5 h-2.5 rounded-full bg-gray-300 mr-2.5"></span>
+                                <span class="text-xs sm:text-sm font-medium text-gray-600">eGFR (CKD-EPI)</span>
                             </div>
-                            <span id="val-ckd-stage" class="text-xs font-bold text-gray-500 mt-1 ml-5">Stage --</span>
+                            <span id="val-ckd-stage" class="text-xs font-bold text-gray-500 mt-0.5 ml-5">Stage --</span>
                         </div>
                         <div class="flex items-baseline">
-                            <span id="val-egfr" class="result-value text-xl font-bold text-gray-900">--</span>
+                            <span id="val-egfr" class="result-value text-lg sm:text-xl font-bold text-gray-900">--</span>
                             <span class="text-xs text-gray-600 ml-1">ml/min/1.73m²</span>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Desktop Medical Disclaimer (Neatly pinned in sidebar) -->
+            <p class="hidden lg:block text-[11px] text-gray-400 text-center leading-relaxed px-2 py-1 mt-auto shrink-0">
+                For clinical informational reference only. Verify with official prescribing information before use.
+            </p>
+
         </aside>
 
         <!-- ==================== Main content (Search + Dosing Recommendations) ==================== -->
-        <main class="w-full lg:flex-1 min-w-0 flex flex-col gap-6 lg:gap-8">
+        <main class="w-full lg:flex-1 min-w-0 flex flex-col h-full">
 
             <!-- 3. Medications (Search + Dosing Recommendations merged) -->
-            <div class="bento-card relative">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div class="bento-card relative h-full flex flex-col p-4 sm:p-5 lg:p-6 overflow-hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 shrink-0">
                     <div>
-                        <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">Dosing Recommendations</h2>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight">Dosing Recommendations</h2>
+                            <span id="dashboard-drug-count" class="inline-block bg-gray-100 text-gray-700 text-xs px-2.5 py-0.5 rounded-full font-medium">-- drugs</span>
+                        </div>
                         <p class="text-xs text-gray-500 mt-0.5">รายการยาและคำแนะนำการปรับขนาดยาตามการทำงานของไต</p>
-                        <span id="dashboard-drug-count" class="inline-block mt-2 bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full font-medium">-- drugs</span>
                     </div>
 
                     <!-- Unified Primary Search Bar -->
-                    <div class="relative w-full sm:w-80">
-                        <input type="text" id="drug-search" disabled class="soft-input w-full pl-10 pr-9 py-2.5 text-sm disabled:opacity-50 disabled:bg-gray-100 rounded-full border border-gray-200 focus:bg-white focus:border-indigo-500 transition-all shadow-sm" placeholder="ค้นหาชื่อยา หรือกลุ่มยา (เช่น Metformin, NSAID)...">
-                        <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        <button id="drug-search-clear" type="button" onclick="clearDrugSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1" aria-label="Clear search">
+                    <div class="relative w-full sm:w-72 md:w-80 shrink-0">
+                        <input type="text" id="drug-search" disabled class="soft-input w-full pl-9 pr-8 py-2 text-sm disabled:opacity-50 disabled:bg-gray-100 rounded-full border border-gray-200 focus:bg-white focus:border-indigo-500 transition-all shadow-sm" placeholder="ค้นหาชื่อยา หรือกลุ่มยา (เช่น Metformin, NSAID)...">
+                        <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <button id="drug-search-clear" type="button" onclick="clearDrugSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1" aria-label="Clear search">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
                 </div>
 
                 <!-- Categories -->
-                <div class="flex flex-wrap items-center gap-2 mb-6" id="category-chips-container">
-                    <button type="button" data-category="" onclick="filterCategory('', this)" class="cat-pill active text-xs font-semibold px-4 py-2 rounded-full transition-all cursor-pointer bg-indigo-600 text-white ring-2 ring-indigo-600 ring-offset-2 shadow-sm">ทั้งหมด (All)</button>
-                    <button type="button" data-category="Antidiabetic" onclick="filterCategory('Antidiabetic', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Antidiabetics</button>
-                    <button type="button" data-category="Antibiotic" onclick="filterCategory('Antibiotic', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Antibiotics</button>
-                    <button type="button" data-category="Cardiovascular" onclick="filterCategory('Cardiovascular', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Cardiovascular</button>
-                    <button type="button" data-category="NSAID" onclick="filterCategory('NSAID', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:border-amber-300">⚠️ NSAIDs</button>
-                    <button type="button" data-category="Analgesic" onclick="filterCategory('Analgesic', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Analgesics</button>
-                    <button type="button" data-category="H2 Blocker" onclick="filterCategory('H2 Blocker', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">H2 Blockers</button>
-                    <button type="button" data-category="Quinolone" onclick="filterCategory('Quinolone', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Quinolones</button>
-                    <button type="button" data-category="Cephalosporin" onclick="filterCategory('Cephalosporin', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Cephalosporins</button>
-                    <button type="button" data-category="Aminoglycoside" onclick="filterCategory('Aminoglycoside', this)" class="cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Aminoglycosides</button>
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 mb-3 shrink-0 scroll-smooth" id="category-chips-container">
+                    <button type="button" data-category="" onclick="filterCategory('', this)" class="cat-pill shrink-0 whitespace-nowrap active text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-indigo-600 text-white ring-2 ring-indigo-600 ring-offset-2 shadow-sm">ทั้งหมด (All)</button>
+                    <button type="button" data-category="Antidiabetic" onclick="filterCategory('Antidiabetic', this)" class="cat-pill shrink-0 whitespace-nowrap text-xs font-medium px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Antidiabetics</button>
+                    <button type="button" data-category="Antibiotic" onclick="filterCategory('Antibiotic', this)" class="cat-pill shrink-0 whitespace-nowrap text-xs font-medium px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Antibiotics</button>
+                    <button type="button" data-category="Cardiovascular" onclick="filterCategory('Cardiovascular', this)" class="cat-pill shrink-0 whitespace-nowrap text-xs font-medium px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Cardiovascular</button>
+                    <button type="button" data-category="NSAID" onclick="filterCategory('NSAID', this)" class="cat-pill shrink-0 whitespace-nowrap text-xs font-medium px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:border-amber-300">⚠️ NSAIDs</button>
+                    <button type="button" data-category="Analgesic" onclick="filterCategory('Analgesic', this)" class="cat-pill shrink-0 whitespace-nowrap text-xs font-medium px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Analgesics</button>
+                    <button type="button" data-category="H2 Blocker" onclick="filterCategory('H2 Blocker', this)" class="cat-pill shrink-0 whitespace-nowrap text-xs font-medium px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">H2 Blockers</button>
+                    <button type="button" data-category="Quinolone" onclick="filterCategory('Quinolone', this)" class="cat-pill shrink-0 whitespace-nowrap text-xs font-medium px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Quinolones</button>
+                    <button type="button" data-category="Cephalosporin" onclick="filterCategory('Cephalosporin', this)" class="cat-pill shrink-0 whitespace-nowrap text-xs font-medium px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Cephalosporins</button>
+                    <button type="button" data-category="Aminoglycoside" onclick="filterCategory('Aminoglycoside', this)" class="cat-pill shrink-0 whitespace-nowrap text-xs font-medium px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300">Aminoglycosides</button>
                 </div>
 
-                <!-- Empty State -->
-                <div id="grid-empty-state" class="flex flex-col items-center justify-center text-center py-20 px-8">
-                    <div class="bg-gray-50 p-5 rounded-full shadow-sm mb-4">
-                        <svg class="w-11 h-11 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10.5 20.5L20.5 10.5C22.5 8.5 22.5 5.5 20.5 3.5C18.5 1.5 15.5 1.5 13.5 3.5L3.5 13.5C1.5 15.5 1.5 18.5 3.5 20.5C5.5 22.5 8.5 22.5 10.5 20.5Z"></path>
-                            <line x1="8.5" y1="8.5" x2="15.5" y2="15.5"></line>
-                        </svg>
+                <!-- Scrollable Drug Grid Viewport -->
+                <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar pt-1 pr-1 sm:pr-2">
+                    <!-- Empty State -->
+                    <div id="grid-empty-state" class="flex flex-col items-center justify-center text-center py-16 px-6">
+                        <div class="bg-gray-50 p-4 sm:p-5 rounded-full shadow-sm mb-3 sm:mb-4">
+                            <svg class="w-10 h-10 sm:w-11 sm:h-11 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.5 20.5L20.5 10.5C22.5 8.5 22.5 5.5 20.5 3.5C18.5 1.5 15.5 1.5 13.5 3.5L3.5 13.5C1.5 15.5 1.5 18.5 3.5 20.5C5.5 22.5 8.5 22.5 10.5 20.5Z"></path>
+                                <line x1="8.5" y1="8.5" x2="15.5" y2="15.5"></line>
+                            </svg>
+                        </div>
+                        <p class="font-medium text-sm sm:text-base text-gray-500">Please calculate renal function to view drug recommendations</p>
                     </div>
-                    <p class="font-medium text-gray-500">Please calculate renal function to view drug recommendations</p>
-                </div>
 
-                <!-- Skeleton Loading State -->
-                <div id="drug-grid-skeleton" class="hidden">
-                    <div class="h-5 w-44 bg-gray-200 rounded mb-4 animate-pulse"></div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
-                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
-                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
-                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
+                    <!-- Skeleton Loading State -->
+                    <div id="drug-grid-skeleton" class="hidden">
+                        <div class="h-5 w-44 bg-gray-200 rounded mb-3 animate-pulse"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 min-[1800px]:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                            <div class="h-28 bg-gray-100 rounded-2xl animate-pulse"></div>
+                            <div class="h-28 bg-gray-100 rounded-2xl animate-pulse"></div>
+                            <div class="h-28 bg-gray-100 rounded-2xl animate-pulse"></div>
+                        </div>
+                        <div class="h-5 w-56 bg-gray-200 rounded mb-3 animate-pulse"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 min-[1800px]:grid-cols-4 gap-3 sm:gap-4">
+                            <div class="h-28 bg-gray-100 rounded-2xl animate-pulse"></div>
+                            <div class="h-28 bg-gray-100 rounded-2xl animate-pulse"></div>
+                            <div class="h-28 bg-gray-100 rounded-2xl animate-pulse"></div>
+                        </div>
                     </div>
-                    <div class="h-5 w-56 bg-gray-200 rounded mb-4 animate-pulse"></div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
-                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
-                        <div class="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
+
+                    <!-- No results for current search/category filter -->
+                    <div id="grid-no-results" class="hidden flex-col items-center justify-center text-center py-14 px-6">
+                        <p class="font-medium text-sm sm:text-base text-gray-500">No drugs match your search</p>
                     </div>
-                </div>
 
-                <!-- No results for current search/category filter -->
-                <div id="grid-no-results" class="hidden flex-col items-center justify-center text-center py-16 px-8">
-                    <p class="font-medium text-gray-500">No drugs match your search</p>
+                    <!-- Risk-grouped Sections -->
+                    <div id="drug-grid-sections" class="hidden"></div>
                 </div>
-
-                <!-- Risk-grouped Sections -->
-                <div id="drug-grid-sections" class="hidden"></div>
             </div>
         </main>
 
     </div>
 
-    <!-- Medical disclaimer -->
-    <footer class="page-content max-w-[1600px] mx-auto mt-8 lg:mt-10 px-1 pb-2">
+    <!-- Medical disclaimer (Mobile only, desktop disclaimer is inside sidebar) -->
+    <footer class="page-content w-full max-w-[1720px] mx-auto mt-6 px-1 pb-4 lg:hidden">
         <p class="text-xs text-gray-500 text-center leading-relaxed">
             For informational purposes only and not a substitute for professional clinical judgment. Dosing recommendations should be verified against current prescribing information and institutional protocols before use.
         </p>
     </footer>
 
     <!-- Drug Details Modal -->
-    <div id="drug-modal-backdrop" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-200" onclick="if(event.target===this) closeDrugModal()">
-        <div id="drug-modal-panel" class="bg-white w-full max-w-lg rounded-xl shadow-2xl max-h-[85vh] flex flex-col opacity-0 scale-95 transition-all duration-200 ease-out">
+    <div id="drug-modal-backdrop" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 opacity-0 transition-opacity duration-200" onclick="if(event.target===this) closeDrugModal()">
+        <div id="drug-modal-panel" class="bg-white w-full max-w-lg rounded-2xl sm:rounded-3xl shadow-2xl max-h-[90dvh] flex flex-col opacity-0 scale-95 transition-all duration-200 ease-out overflow-hidden">
 
             <!-- Header -->
-            <div class="flex items-start justify-between gap-4 p-6 border-b border-gray-100">
+            <div class="flex items-start justify-between gap-3 p-4 sm:p-6 border-b border-gray-100 shrink-0">
                 <div>
-                    <h3 id="modal-drug-name" class="text-2xl font-bold text-gray-900 tracking-tight">--</h3>
-                    <p id="modal-drug-cat" class="text-sm text-gray-600 mt-1">--</p>
-                    <div class="inline-flex items-center gap-2 mt-3 px-3 py-1 rounded-full bg-gray-50 border border-gray-100">
+                    <h3 id="modal-drug-name" class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">--</h3>
+                    <p id="modal-drug-cat" class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">--</p>
+                    <div class="inline-flex items-center gap-2 mt-2.5 px-2.5 py-1 rounded-full bg-gray-50 border border-gray-100">
                         <span id="modal-param-dot" class="w-2 h-2 rounded-full bg-gray-300"></span>
                         <span class="text-xs font-semibold text-gray-600"><span id="modal-param-name">eGFR</span>: <span id="modal-param-val">--</span></span>
                     </div>
                 </div>
-                <button onclick="closeDrugModal()" class="shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition" aria-label="Close">
+                <button onclick="closeDrugModal()" class="shrink-0 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition" aria-label="Close">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
 
             <!-- Body -->
-            <div class="p-6 overflow-y-auto space-y-5">
+            <div class="p-4 sm:p-6 overflow-y-auto custom-scrollbar space-y-4 sm:space-y-5 flex-1 min-h-0">
                 <div id="modal-danger-banner" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 flex items-start gap-3">
                     <span class="text-xl">🛑</span>
                     <div>
@@ -462,7 +490,7 @@
             </div>
 
             <!-- Footer -->
-            <div class="flex justify-between items-center p-4 border-t border-gray-100">
+            <div class="flex justify-between items-center p-3.5 sm:p-4 border-t border-gray-100 shrink-0">
                 <button id="btn-copy-modal" type="button" onclick="copyModalDrugResult()" class="px-4 py-2 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-semibold flex items-center gap-2 transition cursor-pointer active:scale-95" title="Copy recommendation to clipboard" aria-label="Copy recommendation to clipboard">
                     <svg class="w-4 h-4 copy-icon shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -1401,14 +1429,14 @@
                 const accentTextMap = { red: 'text-red-600', yellow: 'text-yellow-700', green: 'text-green-700' };
 
                 const section = document.createElement('section');
-                section.className = 'mb-8 last:mb-0';
+                section.className = 'mb-6 last:mb-0';
                 section.innerHTML = `
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="text-lg">${group.icon}</span>
-                        <h3 class="text-lg font-bold ${accentTextMap[group.accent]}">${group.title}</h3>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-base sm:text-lg">${group.icon}</span>
+                        <h3 class="text-base sm:text-lg font-bold ${accentTextMap[group.accent]}">${group.title}</h3>
                         <span class="text-xs font-medium text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">${items.length}</span>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 min-[1800px]:grid-cols-4 gap-3 sm:gap-4"></div>
                 `;
                 const gridEl = section.querySelector('.grid');
                 items.forEach(item => gridEl.appendChild(buildDrugCard(item, group)));
@@ -1606,11 +1634,14 @@
             if (!btn) return;
             const isNSAID = btn.getAttribute('data-category') === 'NSAID';
             if (isActive) {
-                btn.className = 'cat-pill active text-xs font-semibold px-4 py-2 rounded-full transition-all cursor-pointer bg-indigo-600 text-white ring-2 ring-indigo-600 ring-offset-2 shadow-sm scale-105';
+                btn.className = 'cat-pill shrink-0 whitespace-nowrap active text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-indigo-600 text-white ring-2 ring-indigo-600 ring-offset-2 shadow-sm scale-105';
+                if (btn.scrollIntoView) {
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
             } else if (isNSAID) {
-                btn.className = 'cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:border-amber-300';
+                btn.className = 'cat-pill shrink-0 whitespace-nowrap text-xs font-medium px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:border-amber-300';
             } else {
-                btn.className = 'cat-pill text-xs font-medium px-4 py-2 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300';
+                btn.className = 'cat-pill shrink-0 whitespace-nowrap text-xs font-medium px-3.5 py-1.5 rounded-full transition-all cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300';
             }
         }
 
@@ -1881,7 +1912,7 @@
             if ('caches' in window) {
                 caches.keys().then((names) => {
                     for (const name of names) {
-                        if (name !== 'kidny-cache-v3') {
+                        if (name !== 'kidny-cache-v4') {
                             caches.delete(name);
                         }
                     }

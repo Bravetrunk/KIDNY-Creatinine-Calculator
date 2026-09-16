@@ -53,12 +53,15 @@ Reference: ADA Guidelines
 - **Interactive Feedback**: Visual transition (`Copied! ✓`), emerald badge highlight, and auto-dismissing toast notifications.
 - **Cross-Browser Clipboard**: Uses modern `navigator.clipboard` with an automatic `document.execCommand('copy')` textarea fallback for legacy or non-secure contexts.
 
-### 3. 💊 Medication Dosing Dashboard & Clinical Safety
-- **Pinned Renal Panel (Sticky Sidebar)**:
-  - The left panel (Patient Inputs & Renal Function card) stays pinned (`sticky top-6 self-start`) on desktop screens, ensuring calculated CrCl and eGFR never scroll out of view while exploring medications.
-- **Consolidated Search & Category Chips**:
+### 3. 💊 Adaptive Fit-to-Screen Dashboard & Clinical Safety
+- **Adaptive Fit-to-Screen Layout**:
+  - **Desktop / Workstation**: The entire workspace is engineered to fit within the viewport height (`h-screen overflow-hidden`) with zero outer scrollbar. Left and right columns operate with independent fluid scrolling (`overflow-y-auto custom-scrollbar`), keeping calculations and search controls continuously visible.
+  - **Mobile / Tablet**: Gracefully adapts to natural fluid document flow with touch-friendly spacing and responsive card padding.
+  - **Adaptive Grid**: Drug cards dynamically arrange into 1, 2, 3, or 4 columns across mobile, laptop, desktop, and ultra-wide displays.
+- **Scrollable Category Chips Bar**:
+  - Compact horizontal chip bar with smooth touch scrolling and high-contrast active pills, preserving maximum vertical screen space.
+- **Consolidated Search**:
   - Unified top search bar with instant clear button (`✕`) for rapid medication lookup.
-  - High-contrast Category Chips with distinct active pill styles, including **"ทั้งหมด (All)"** and quick filter **"⚠️ NSAIDs"**.
 - **Status Badges & Visual Categorization**:
   - 🛑 **Contraindicated**: Highlighted with red danger styling when kidney function falls below safe thresholds.
   - ⚠️ **Dose Adjustment Required**: Amber warnings for dose reductions or extended dosing intervals.
@@ -82,7 +85,7 @@ Reference: ADA Guidelines
 - **Service Worker (`sw.js`)**:
   - **Network-First Strategy** for HTML navigations (`index.html`, `index2.html`) ensuring immediate live updates when online while falling back seamlessly to offline cache.
   - **Stale-While-Revalidate Strategy** for styling, vector icons, and font dependencies.
-  - Dynamic cache migration (`kidny-cache-v3`) with automatic purging of obsolete caches.
+  - Dynamic cache migration (`kidny-cache-v4`) with automatic purging of obsolete caches.
 - **Installable Native App Feel**:
   - Add to Home Screen / Dock across macOS, iOS (Safari Share menu), Android (Chrome install banner), and Windows (Edge).
   - Standalone display mode with custom theme colors (`#6366f1`).
@@ -130,7 +133,7 @@ KIDNY/
 ├── index.html              # Primary Bento-grid application with full drug DB & liquid animations
 ├── index2.html             # Clean reference / secondary layout
 ├── manifest.json           # PWA Web App Manifest (standalone display, theme color, icons)
-├── sw.js                   # Service Worker (Network-First for navigation, offline caching v3)
+├── sw.js                   # Service Worker (Network-First for navigation, offline caching v4)
 ├── favicon.ico             # Browser tab icon
 ├── icons/                  # Custom medical kidney icon assets
 │   ├── kidney.svg          # Primary vector kidney icon
