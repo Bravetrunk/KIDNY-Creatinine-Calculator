@@ -39,7 +39,7 @@ Clicking **Copy Result** on the Renal Function card generates the standardized 3
 ```
 
 #### Detailed Medication Recommendation
-Clicking copy on any drug card, sidebar check, or drug detail modal generates a full clinical note:
+Clicking copy on any medication card or drug detail modal generates a full clinical note:
 ```text
 [KIDNY: Creatinine Calculator — Renal Dose Recommendation]
 Drug: Metformin (Antidiabetic)
@@ -55,11 +55,17 @@ Reference: ADA Guidelines
 
 ### 3. 💊 Adaptive Fit-to-Screen Dashboard & Clinical Safety
 - **Adaptive Fit-to-Screen Layout**:
-  - **Desktop / Workstation**: The entire workspace is engineered to fit within the viewport height (`h-screen overflow-hidden`) with zero outer scrollbar. Left and right columns operate with independent fluid scrolling (`overflow-y-auto custom-scrollbar`), keeping calculations and search controls continuously visible.
-  - **Mobile / Tablet**: Gracefully adapts to natural fluid document flow with touch-friendly spacing and responsive card padding.
-  - **Adaptive Grid**: Drug cards dynamically arrange into 1, 2, 3, or 4 columns across mobile, laptop, desktop, and ultra-wide displays.
+  - **Desktop / Workstation (1024px+)**: The entire workspace is engineered to fit within the viewport height (`h-screen overflow-hidden`) with zero outer scrollbar. Left and right columns operate with independent fluid scrolling (`overflow-y-auto custom-scrollbar`), keeping calculations and search controls continuously visible.
+  - **Mobile & Tablets (< 1024px)**: Gracefully adapts to natural fluid document flow with touch-friendly spacing and responsive card padding.
+  - **Dynamic Multi-Column Grid**: Drug cards dynamically arrange into:
+    - **1 Column**: Mobile phones (< 768px)
+    - **2 Columns**: Tablets & standard laptops (768px - 1535px)
+    - **3 Columns**: Large desktop monitors (1536px - 1799px)
+    - **4 Columns**: Ultra-wide displays (1800px+)
 - **Scrollable Category Chips Bar**:
-  - Compact horizontal chip bar with smooth touch scrolling and high-contrast active pills, preserving maximum vertical screen space.
+  - Compact horizontal chip carousel with smooth touch scrolling and high-contrast active pills, preserving maximum vertical screen space.
+  - Quick filters include **"ทั้งหมด (All)"** and dedicated **"⚠️ NSAIDs"** shortcut.
+  - Clicking any category pill smoothly centers it in view (`scrollIntoView`).
 - **Consolidated Search**:
   - Unified top search bar with instant clear button (`✕`) for rapid medication lookup.
 - **Status Badges & Visual Categorization**:
@@ -72,7 +78,7 @@ Reference: ADA Guidelines
   - **Standardized 3-Line Dose Formatting**: Every medication card displays uniform clinical parameters:
     1. **ขนาดยาที่แนะนำ (Recommended Dose)**
     2. **ความถี่ (Frequency)**
-    3. **ขนาดยาสูงสุดต่อวัน (Max Daily Dose)**
+    3. **ขนาดยาสูงสุดต่อวัน (Max Daily Dose)** *(Contraindicated medications explicitly display `0 mg / วัน`)*
 
 ### 4. 📖 Tiered Rule Details Modal
 - Full access to all tiered clearance cut-offs for any drug.
